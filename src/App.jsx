@@ -29,7 +29,7 @@ const EGG_TYPES = {
     ],
     specialTips:["Cycle très court (17 jours) — chaque heure d'instabilité a un impact plus fort.","Taux d'éclosion acceptable : 60–80%.","📚 Formation 'Démarrer un élevage de caille rentable' dans Formations."],
   },
-  canard:{ name:"Canard colvert / domestique",icon:"🦆",days:28,mirage:[7,14],stopTurn:25,turnsPerDay:3,turnHours:["06h00","14h00","22h00"],youngName:"canetons",minRate:65,eclosionStart:28,eclosionWindow:[28,30],
+  canard:{ name:"Canard colvert / domestique",icon:"🦆",days:28,mirage:[7,14],stopTurn:25,turnsPerDay:3,turnHours:["06h00","14h00","22h00"],youngName:"canetons",minRate:65,eclosionStart:28,eclosionWindow:[28,30],humid:[7,24],
     phases:[{label:"J1–J25",temp:"37.2–37.7°C",hum:"55–65%",note:"+ Humidification externe quotidienne J7–J24"},{label:"J26–J28",temp:"37.0–37.5°C",hum:"70–75%",note:"↓ Baisser température + ↑ Humidité, arrêter humidification externe"}],
     tips:[
       {day:1,text:"Préchauffer pendant 24h. Température : 37.2–37.7°C, humidité : 55–65%. Les œufs de canard produisent plus de chaleur en fin d'incubation."},
@@ -42,7 +42,7 @@ const EGG_TYPES = {
     ],
     specialTips:["L'humidification externe (J7–J24) est LA particularité des œufs de canard. Ne jamais sauter cette étape.","Taux d'éclosion acceptable : 65–80%."],
   },
-  canard_barbarie:{ name:"Canard de Barbarie",icon:"🦢",days:35,mirage:[10,21],stopTurn:32,turnsPerDay:3,turnHours:["06h00","14h00","22h00"],youngName:"canetons",minRate:60,eclosionStart:35,eclosionWindow:[35,37],
+  canard_barbarie:{ name:"Canard de Barbarie",icon:"🦢",days:35,mirage:[10,21],stopTurn:32,turnsPerDay:3,turnHours:["06h00","14h00","22h00"],youngName:"canetons",minRate:60,eclosionStart:35,eclosionWindow:[35,37],humid:[10,31],
     phases:[{label:"J1–J32",temp:"37.2–37.7°C",hum:"55–65%",note:"+ Humidification externe quotidienne J10–J31"},{label:"J33–J35",temp:"37.0–37.5°C",hum:"70–75%",note:"↓ Baisser température + ↑ Humidité"}],
     tips:[
       {day:1,text:"⚠️ Le Barbarie dure 35 jours, pas 28 comme le canard domestique. Ne pas confondre ! Préchauffer 24h à 37.2–37.7°C, humidité 55–65%."},
@@ -267,173 +267,515 @@ const INGREDIENT_CATS=[
   {id:"proteine_ani",label:"🐟 Protéiques animaux",color:"#1558A8"},
   {id:"mineral",label:"🦴 Minéraux",color:"#6B21A8"},
   {id:"additif",label:"⚗️ Additifs",color:"#5C7052"},
+  {id:"concentre",label:"🧪 Concentrés",color:"#B8560A"},
 ];
 
 const INGREDIENTS=[
   // Energétiques
-  {id:"mais",name:"Maïs",family:"energetique",protein:8.5,energy:3380,calcium:0.02,phosphorus:0.28,maxPct:65,defaultPct:null},
-  {id:"sorgho",name:"Sorgho",family:"energetique",protein:10,energy:3310,calcium:0.03,phosphorus:0.30,maxPct:50,defaultPct:null},
-  {id:"son_ble",name:"Son de blé",family:"energetique",protein:15.5,energy:2110,calcium:0.12,phosphorus:1.00,maxPct:15,defaultPct:null},
-  {id:"son_riz",name:"Son de riz",family:"energetique",protein:12.5,energy:2900,calcium:0.10,phosphorus:1.40,maxPct:10,defaultPct:null},
-  {id:"mil",name:"Mil",family:"energetique",protein:10.5,energy:3100,calcium:0.03,phosphorus:0.30,maxPct:40,defaultPct:null},
-  {id:"manioc",name:"Manioc (farine)",family:"energetique",protein:2.5,energy:3300,calcium:0.10,phosphorus:0.10,maxPct:15,defaultPct:null},
+  {id:"mais",name:"Maïs",family:"energetique",protein:8.5,energy:3300,calcium:0.02,phosphorus:0.30,methionine:0.1,lysine:0.24,maxPct:100,defaultPct:null},
+  {id:"sorgho",name:"Sorgho",family:"energetique",protein:10,energy:3310,calcium:0.03,phosphorus:0.30,methionine:0.14,lysine:0.20,maxPct:100,defaultPct:null},
+  {id:"son_ble",name:"Son de blé",family:"energetique",protein:15.99,energy:1440,calcium:0.14,phosphorus:1.3,methionine:0.23,lysine:0.58,maxPct:15,defaultPct:null},
+  {id:"son_riz",name:"Son de riz",family:"energetique",protein:9.7,energy:2950,calcium:0.07,phosphorus:1.4,methionine:0.22,lysine:0.56,maxPct:15,defaultPct:null},
+  {id:"son_mais",name:"Son de maïs",family:"energetique",protein:10.01,energy:2228,calcium:0.03,phosphorus:0.23,methionine:0.5,lysine:0.25,maxPct:15,defaultPct:null},
+  {id:"mil",name:"Mil",family:"energetique",protein:10.5,energy:3100,calcium:0.03,phosphorus:0.30,methionine:0.19,lysine:0.24,maxPct:100,defaultPct:null},
+  {id:"manioc",name:"Manioc (farine)",family:"energetique",protein:2.5,energy:3300,calcium:0.10,phosphorus:0.10,methionine:0.02,lysine:0.10,maxPct:100,defaultPct:null},
+  {id:"huile_vegetale",name:"Huile végétale",family:"energetique",protein:0,energy:8800,calcium:0,phosphorus:0,methionine:0,lysine:0,maxPct:5,defaultPct:null},
+  {id:"huile_rouge",name:"Huile rouge (palme)",family:"energetique",protein:0,energy:7040,calcium:0,phosphorus:0,methionine:0,lysine:0,maxPct:5,defaultPct:null},
   // Protéiques végétaux
-  {id:"tourteau_soja",name:"Tourteau de soja (42–44%)",family:"proteine_veg",protein:43,energy:2350,calcium:0.30,phosphorus:0.65,maxPct:30,defaultPct:null},
-  {id:"tourteau_arachide",name:"Tourteau d'arachide",family:"proteine_veg",protein:46,energy:2600,calcium:0.20,phosphorus:0.60,maxPct:15,defaultPct:null},
-  {id:"tourteau_coton",name:"Tourteau de coton",family:"proteine_veg",protein:39,energy:2100,calcium:0.20,phosphorus:1.10,maxPct:10,defaultPct:null},
-  {id:"tourteau_palmiste",name:"Tourteau de palmiste",family:"proteine_veg",protein:17,energy:2100,calcium:0.30,phosphorus:0.60,maxPct:10,defaultPct:null},
-  {id:"tourteau_tournesol",name:"Tourteau de tournesol",family:"proteine_veg",protein:30,energy:1900,calcium:0.40,phosphorus:1.00,maxPct:10,defaultPct:null},
-  {id:"niebe",name:"Niébé (haricot local)",family:"proteine_veg",protein:23,energy:3100,calcium:0.10,phosphorus:0.40,maxPct:10,defaultPct:null},
+  {id:"tourteau_soja",name:"Tourteau de soja (42–44%)",family:"proteine_veg",protein:43,energy:2420,calcium:0.34,phosphorus:0.7,methionine:0.6,lysine:2.7,maxPct:30,defaultPct:null},
+  {id:"tourteau_arachide",name:"Tourteau d'arachide",family:"proteine_veg",protein:46,energy:2600,calcium:0.20,phosphorus:0.60,methionine:0.45,lysine:1.55,maxPct:15,defaultPct:null},
+  {id:"tourteau_coton",name:"Tourteau de coton",family:"proteine_veg",protein:39,energy:2100,calcium:0.20,phosphorus:1.10,methionine:0.55,lysine:1.65,maxPct:10,defaultPct:null},
+  {id:"tourteau_palmiste",name:"Tourteau de palmiste",family:"proteine_veg",protein:16,energy:2368,calcium:0.3,phosphorus:0.6,methionine:0.3,lysine:0.6,maxPct:10,defaultPct:null},
+  {id:"tourteau_tournesol",name:"Tourteau de tournesol",family:"proteine_veg",protein:30,energy:1900,calcium:0.40,phosphorus:1.00,methionine:0.65,lysine:1.05,maxPct:10,defaultPct:null},
+  {id:"niebe",name:"Niébé (haricot local)",family:"proteine_veg",protein:23,energy:3100,calcium:0.10,phosphorus:0.40,methionine:0.30,lysine:1.50,maxPct:10,defaultPct:null},
+  {id:"soja_torrefie",name:"Soja graine torréfié",family:"proteine_veg",protein:37,energy:3900,calcium:0.25,phosphorus:0.57,methionine:0.52,lysine:2.35,maxPct:20,defaultPct:null},
   // Protéiques animaux
-  {id:"farine_poisson_60",name:"Farine de poisson (60%)",family:"proteine_ani",protein:62,energy:3000,calcium:3.50,phosphorus:2.50,maxPct:10,defaultPct:null},
-  {id:"farine_poisson_50",name:"Farine de poisson (50%)",family:"proteine_ani",protein:50,energy:2800,calcium:4.00,phosphorus:2.80,maxPct:10,defaultPct:null},
-  {id:"farine_viande",name:"Farine de viande et os",family:"proteine_ani",protein:47,energy:2350,calcium:9.00,phosphorus:4.50,maxPct:5,defaultPct:null},
+  {id:"farine_poisson_60",name:"Farine de poisson (60%)",family:"proteine_ani",protein:62,energy:3000,calcium:3.50,phosphorus:2.50,methionine:1.70,lysine:4.70,maxPct:10,defaultPct:null},
+  {id:"farine_poisson_50",name:"Farine de poisson (50%)",family:"proteine_ani",protein:50,energy:2800,calcium:4.00,phosphorus:2.80,methionine:1.40,lysine:3.80,maxPct:10,defaultPct:null},
+  {id:"farine_poisson_artisanale",name:"Farine de poisson artisanale (résidus)",family:"proteine_ani",protein:46,energy:2820,calcium:5,phosphorus:2.6,methionine:1.3,lysine:3.5,maxPct:8,defaultPct:null},
+  {id:"farine_viande",name:"Farine de viande et os",family:"proteine_ani",protein:47,energy:2350,calcium:9.00,phosphorus:4.50,methionine:0.65,lysine:2.50,maxPct:5,defaultPct:null},
   // Minéraux
-  {id:"coquilles",name:"Coquilles d'huîtres",family:"mineral",protein:0,energy:0,calcium:37,phosphorus:0.02,maxPct:8,defaultPct:null},
-  {id:"calcaire",name:"Calcaire agricole",family:"mineral",protein:0,energy:0,calcium:37,phosphorus:0.02,maxPct:8,defaultPct:null},
-  {id:"farine_os",name:"Farine d'os",family:"mineral",protein:0,energy:0,calcium:26,phosphorus:13,maxPct:3,defaultPct:null},
-  {id:"phosphate_bi",name:"Phosphate bicalcique",family:"mineral",protein:0,energy:0,calcium:23,phosphorus:19,maxPct:2,defaultPct:null},
+  {id:"coquilles",name:"Coquilles d'huîtres",family:"mineral",protein:0,energy:0,calcium:38,phosphorus:0.05,methionine:0,lysine:0,maxPct:8,defaultPct:null},
+  {id:"calcaire",name:"Calcaire agricole",family:"mineral",protein:0,energy:0,calcium:37,phosphorus:0.02,methionine:0,lysine:0,maxPct:8,defaultPct:null},
+  {id:"farine_os",name:"Farine d'os",family:"mineral",protein:0,energy:0,calcium:26,phosphorus:13,methionine:0,lysine:0,maxPct:3,defaultPct:null},
+  {id:"phosphate_bi",name:"Phosphate bicalcique",family:"mineral",protein:0,energy:0,calcium:18,phosphorus:18,methionine:0,lysine:0,maxPct:2,defaultPct:null},
+  // Concentrés
+  {id:"concentre_chair",name:"Concentré chair",family:"concentre",protein:45,energy:2400,calcium:7,phosphorus:4.5,methionine:2,lysine:3,maxPct:5,defaultPct:null},
+  {id:"concentre_ponte",name:"Concentré ponte",family:"concentre",protein:45,energy:2300,calcium:7,phosphorus:4.5,methionine:1.7,lysine:2.5,maxPct:5,defaultPct:null},
   // Additifs
-  {id:"premix",name:"Prémix vitamines-minéraux",family:"additif",protein:0,energy:0,calcium:0,phosphorus:0,maxPct:0.5,defaultPct:0.5},
-  {id:"sel",name:"Sel (NaCl)",family:"additif",protein:0,energy:0,calcium:0,phosphorus:0,maxPct:0.3,defaultPct:0.25},
-  {id:"methionine",name:"Méthionine",family:"additif",protein:0,energy:0,calcium:0,phosphorus:0,maxPct:0.2,defaultPct:0.1},
-  {id:"lysine",name:"Lysine",family:"additif",protein:0,energy:0,calcium:0,phosphorus:0,maxPct:0.2,defaultPct:0.1},
+  {id:"premix",name:"Prémix vitamines-minéraux",family:"additif",protein:0,energy:0,calcium:0,phosphorus:0,methionine:0,lysine:0,maxPct:0.5,defaultPct:0.5},
+  {id:"sel",name:"Sel (NaCl)",family:"additif",protein:0,energy:0,calcium:0,phosphorus:0,methionine:0,lysine:0,maxPct:0.3,defaultPct:0.25},
+  {id:"methionine",name:"Méthionine",family:"additif",protein:58.7,energy:4950,calcium:0.02,phosphorus:0,methionine:99,lysine:0,maxPct:0.2,defaultPct:null},
+  {id:"lysine",name:"Lysine",family:"additif",protein:95.6,energy:3870,calcium:0.04,phosphorus:0,methionine:0,lysine:78.4,maxPct:0.3,defaultPct:null},
 ];
 
 const FEED_TARGETS={
-  poulet_chair_demarrage:{label:"Poulet de chair — Démarrage (0–3 semaines)",protein:23,energy:3100,calcium:1.0,phosphorus:0.45},
-  poulet_chair_croissance:{label:"Poulet de chair — Croissance (3–6 semaines)",protein:20,energy:3200,calcium:0.9,phosphorus:0.40},
-  poulet_chair_finition:{label:"Poulet de chair — Finition (6+ semaines)",protein:18,energy:3300,calcium:0.8,phosphorus:0.35},
-  pondeuse_demarrage:{label:"Pondeuse — Démarrage poussin (0–8 sem.)",protein:21,energy:3000,calcium:0.9,phosphorus:0.40},
-  pondeuse_poulette:{label:"Pondeuse — Poulette (8–18 sem.)",protein:16,energy:2800,calcium:0.9,phosphorus:0.35},
-  pondeuse_ponte:{label:"Pondeuse — Ponte",protein:17,energy:2800,calcium:3.8,phosphorus:0.35},
-  caille_demarrage:{label:"Caille — Démarrage (0–3 semaines)",protein:25,energy:3000,calcium:0.8,phosphorus:0.45},
-  caille_ponte:{label:"Caille — Ponte",protein:21,energy:2900,calcium:2.75,phosphorus:0.35},
+  poulet_chair_demarrage:{label:"Poulet de chair — Démarrage (0–3 semaines)",protein:23,energy:3100,calcium:1.0,phosphorus:0.45,methionine:0.50,lysine:1.10},
+  poulet_chair_croissance:{label:"Poulet de chair — Croissance (3–6 semaines)",protein:20,energy:3200,calcium:0.9,phosphorus:0.40,methionine:0.42,lysine:0.95},
+  poulet_chair_finition:{label:"Poulet de chair — Finition (6+ semaines)",protein:18,energy:3300,calcium:0.8,phosphorus:0.35,methionine:0.38,lysine:0.85},
+  pondeuse_demarrage:{label:"Pondeuse — Démarrage poussin (0–8 sem.)",protein:21,energy:3000,calcium:0.9,phosphorus:0.40,methionine:0.45,lysine:1.00},
+  pondeuse_poulette:{label:"Pondeuse — Poulette (8–18 sem.)",protein:16,energy:2800,calcium:0.9,phosphorus:0.35,methionine:0.32,lysine:0.68},
+  pondeuse_ponte:{label:"Pondeuse — Ponte",protein:17,energy:2800,calcium:3.8,phosphorus:0.35,methionine:0.38,lysine:0.75},
+  // Caille — Chair (extrapolation raisonnée, pas de source terrain spécifique)
+  caille_chair_demarrage:{label:"Caille chair — Démarrage (0–3 sem.)",protein:25,energy:3000,calcium:0.8,phosphorus:0.45,methionine:0.55,lysine:1.25},
+  caille_chair_croissance:{label:"Caille chair — Croissance (3–6 sem.)",protein:22,energy:3050,calcium:0.75,phosphorus:0.42,methionine:0.48,lysine:1.05},
+  caille_chair_finition:{label:"Caille chair — Finition (6 sem.+)",protein:20,energy:3100,calcium:0.7,phosphorus:0.40,methionine:0.42,lysine:0.90},
+  // Caille — Ponte (extrapolation raisonnée)
+  caille_ponte_demarrage:{label:"Caille ponte — Démarrage ponte (0–6 sem.)",protein:25,energy:3000,calcium:0.8,phosphorus:0.45,methionine:0.55,lysine:1.25},
+  caille_ponte_croissance:{label:"Caille ponte — Croissance ponte (7–17 sem.)",protein:18,energy:2950,calcium:1.5,phosphorus:0.38,methionine:0.35,lysine:0.70},
+  caille_ponte_aliment:{label:"Caille ponte — Aliment ponte (18 sem.+)",protein:21,energy:2900,calcium:2.75,phosphorus:0.35,methionine:0.42,lysine:0.90},
+  // Goliath — Chair (source : recherche recoupée youtube/scribd/facebook)
+  goliath_chair_demarrage:{label:"Goliath chair — Démarrage (1–4 sem.)",protein:22.5,energy:3100,calcium:1.05,phosphorus:0.525,methionine:0.46,lysine:1.07},
+  goliath_chair_croissance:{label:"Goliath chair — Croissance (5–8 sem.)",protein:20,energy:3190,calcium:0.95,phosphorus:0.45,methionine:0.40,lysine:0.90},
+  goliath_chair_finition:{label:"Goliath chair — Finition (9–12 sem.)",protein:18.5,energy:3300,calcium:0.85,phosphorus:0.40,methionine:0.35,lysine:0.75},
+  // Goliath — Ponte (énergie/protéines : données terrain éleveur spécialisé ; calcium/phosphore/lysine/méthionine : recherche recoupée)
+  goliath_ponte_demarrage:{label:"Goliath ponte — Démarrage ponte (0–6 sem.)",protein:20,energy:2970,calcium:1.05,phosphorus:0.525,methionine:0.46,lysine:1.07},
+  goliath_ponte_croissance:{label:"Goliath ponte — Croissance ponte (7–20 sem.)",protein:13.5,energy:2826,calcium:1.45,phosphorus:0.45,methionine:0.375,lysine:0.85},
+  goliath_ponte_aliment:{label:"Goliath ponte — Aliment ponte (21–72 sem.)",protein:16,energy:1900,calcium:3.75,phosphorus:0.475,methionine:0.515,lysine:0.89},
 };
 
 const FEED_TYPE_PHASES={
   poulet_chair:{label:"Poulet de chair",phases:[{id:"poulet_chair_demarrage",label:"Démarrage (0–3 sem.)"},{id:"poulet_chair_croissance",label:"Croissance (3–6 sem.)"},{id:"poulet_chair_finition",label:"Finition (6+ sem.)"}]},
   pondeuse:{label:"Pondeuse",phases:[{id:"pondeuse_demarrage",label:"Démarrage poussin (0–8 sem.)"},{id:"pondeuse_poulette",label:"Poulette (8–18 sem.)"},{id:"pondeuse_ponte",label:"Ponte"}]},
-  caille:{label:"Caille",phases:[{id:"caille_demarrage",label:"Démarrage (0–3 sem.)"},{id:"caille_ponte",label:"Ponte"}]},
+  caille_chair:{label:"Caille chair",phases:[{id:"caille_chair_demarrage",label:"Démarrage (0–3 sem.)"},{id:"caille_chair_croissance",label:"Croissance (3–6 sem.)"},{id:"caille_chair_finition",label:"Finition (6 sem.+)"}]},
+  caille_ponte:{label:"Caille ponte",phases:[{id:"caille_ponte_demarrage",label:"Démarrage ponte (0–6 sem.)"},{id:"caille_ponte_croissance",label:"Croissance ponte (7–17 sem.)"},{id:"caille_ponte_aliment",label:"Aliment ponte (18 sem.+)"}]},
+  goliath_chair:{label:"Goliath chair",phases:[{id:"goliath_chair_demarrage",label:"Démarrage (1–4 sem.)"},{id:"goliath_chair_croissance",label:"Croissance (5–8 sem.)"},{id:"goliath_chair_finition",label:"Finition (9–12 sem.)"}]},
+  goliath_ponte:{label:"Goliath ponte",phases:[{id:"goliath_ponte_demarrage",label:"Démarrage ponte (0–6 sem.)"},{id:"goliath_ponte_croissance",label:"Croissance ponte (7–20 sem.)"},{id:"goliath_ponte_aliment",label:"Aliment ponte (21–72 sem.)"}]},
 };
+
+// Teneur maximale théorique d'un nutriment atteignable avec les ingrédients
+// sélectionnés. Par défaut, chacun est poussé jusqu'à son dosage maximal
+// recommandé (les plus concentrés étant priorisés). Les ingrédients listés
+// dans relaxIds (naturels : protéiques, minéraux) peuvent être poussés
+// jusqu'à 100% pour évaluer la limite physique absolue — jamais les additifs
+// de synthèse (prémix, sel, méthionine/lysine pures), dont le dosage reste
+// un plafond de sécurité strict.
+function theoreticalMaxNutrient(ingredients,key,relaxIds=EMPTY_SET){
+  const sorted=[...ingredients].sort((a,b)=>(b[key]||0)-(a[key]||0));
+  let budget=100,total=0;
+  for(const ing of sorted){
+    if(budget<=0)break;
+    const cap=relaxIds.has(ing.id)?100:ing.maxPct;
+    const take=Math.min(cap,budget);
+    total+=take*(ing[key]||0)/100;
+    budget-=take;
+  }
+  return total;
+}
+const EMPTY_SET=new Set();
+
+// Un paramètre de FEED_TARGETS peut être soit une valeur unique (nombre),
+// soit un intervalle {min,max} quand la source fournit une vraie fourchette.
+// Ces trois utilitaires centralisent la lecture pour que le reste du code
+// (alertes, affichage) n'ait pas à tester le type à chaque fois.
+const isRange=v=>v!==null&&typeof v==="object";
+const targetMin=v=>isRange(v)?v.min:v;
+const targetMax=v=>isRange(v)?v.max:v;
+const fmtTarget=(v,unit,dec=0)=>isRange(v)?`${targetMin(v).toFixed(dec).replace(/\.0+$/,"").replace(".",",")}–${targetMax(v).toFixed(dec).replace(/\.0+$/,"").replace(".",",")}${unit}`:`${v}${unit}`;
+
+// Répartit un ensemble d'ingrédients pour atteindre une cible de nutriment,
+// en priorisant les plus concentrés, dans la limite de leur dosage déjà
+// utilisé (already), et en respectant le plafond recommandé sauf pour les
+// ingrédients assouplissables (relaxIds).
+function allocateForTarget(ingredients,key,targetPct,already={},relaxIds=EMPTY_SET){
+  const sorted=[...ingredients].sort((a,b)=>(b[key]||0)-(a[key]||0));
+  let achieved=0;
+  const allocations={};
+  for(const ing of sorted){
+    const cap=relaxIds.has(ing.id)?100:ing.maxPct;
+    const headroom=Math.max(0,cap-(already[ing.id]||0));
+    if(achieved>=targetPct||headroom<=0)continue;
+    const gap=targetPct-achieved;
+    if(!(ing[key]>0))continue;
+    const rawTake=gap*100/ing[key];
+    // Ingrédient trop peu concentré pour combler l'écart restant dans son
+    // dosage disponible : le pousser jusqu'à son plafond n'apporterait
+    // qu'une contribution négligeable au nutriment visé, au prix d'un effet
+    // de bord disproportionné sur ses autres teneurs (ex. une coquille très
+    // calcique saturée pour un besoin résiduel de phosphore, qui fait
+    // exploser le calcium sans réellement combler le phosphore). On l'ignore
+    // dans ce cas plutôt que de la saturer inutilement.
+    if(rawTake>headroom&&ing[key]<1)continue;
+    const take=Math.min(headroom,rawTake);
+    if(take>0){allocations[ing.id]=Math.round(take*100)/100;achieved+=take*(ing[key]||0)/100;}
+  }
+  return{allocations,achieved};
+}
+
+// Construit un mélange protéines + énergie pour une "part protéique" donnée
+// (protShare = % du total consacré aux ingrédients protéiques). Les
+// ingrédients protéiques listés dans relaxIds peuvent dépasser leur dosage
+// recommandé si besoin (avec avertissement généré plus haut dans formuler()).
+function buildProteinEnergyBlend(ani,veg,eng,protShare,totalBudget,relaxIds=EMPTY_SET){
+  const protBudget=Math.max(0,Math.min(protShare,totalBudget));
+  const protAlloc={};
+  let protUsed=0;
+  // Les protéines animales restent plafonnées à ~35% de la part protéique
+  // (coût et disponibilité réels en petit élevage) — ce plafond d'équilibre
+  // n'est pas assoupli, contrairement au dosage max par ingrédient.
+  const aniCap=protBudget*0.35;
+  let aniUsed=0;
+  [...ani].sort((a,b)=>b.protein-a.protein).forEach(ing=>{
+    if(aniUsed>=aniCap)return;
+    const cap=relaxIds.has(ing.id)?100:ing.maxPct;
+    const take=Math.min(cap,aniCap-aniUsed,protBudget-protUsed);
+    if(take>0){protAlloc[ing.id]=Math.round(take*100)/100;aniUsed+=take;protUsed+=take;}
+  });
+  [...veg].sort((a,b)=>b.protein-a.protein).forEach(ing=>{
+    if(protUsed>=protBudget)return;
+    const cap=relaxIds.has(ing.id)?100:ing.maxPct;
+    const take=Math.min(cap,protBudget-protUsed);
+    if(take>0){protAlloc[ing.id]=Math.round(take*100)/100;protUsed+=take;}
+  });
+  const engBudget=Math.max(0,totalBudget-protUsed);
+  const mainEng=eng.find(i=>i.id==="mais")||eng.find(i=>i.id==="sorgho")||eng.find(i=>i.id==="mil")||eng[0];
+  // Seuls les énergétiques PLUS concentrés que le principal reçoivent
+  // automatiquement une part du budget ici (ex. huile, en complément du
+  // maïs). Un ingrédient moins énergétique que le principal (ex. son de riz
+  // face au maïs) ne doit pas lui voler du budget : ça diluerait l'énergie
+  // du mélange au lieu de la renforcer.
+  const otherEng=[...eng.filter(i=>i.id!==mainEng.id&&i.energy>mainEng.energy)].sort((a,b)=>b.energy-a.energy);
+  const engAlloc={};
+  let otherUsed=0;
+  otherEng.forEach(ing=>{
+    const take=Math.min(ing.maxPct,engBudget*0.25,engBudget-otherUsed);
+    if(take>0){engAlloc[ing.id]=Math.round(take*100)/100;otherUsed+=take;}
+  });
+  const mainTake=Math.max(0,Math.min(engBudget-otherUsed,mainEng.maxPct));
+  engAlloc[mainEng.id]=Math.round(mainTake*100)/100;
+  return{protAlloc,engAlloc,mainEngId:mainEng.id};
+}
+
+function blendProteinPct(protAlloc,engAlloc,allIngById){
+  let p=0;
+  Object.entries({...protAlloc,...engAlloc}).forEach(([id,pct])=>{p+=pct*(allIngById[id]?.protein||0)/100;});
+  return p;
+}
+
+// Recherche par dichotomie de la part protéique du mélange qui approche au
+// mieux la cible de protéines, sous contrainte des dosages max de chaque
+// ingrédient (ou assoupli pour relaxIds). C'est le cœur de l'algorithme
+// d'optimisation automatique des proportions : au lieu d'une formule fermée
+// unique, on converge itérativement.
+function optimizeProtShare(ani,veg,eng,targetProtein,totalBudget,allIngById,relaxIds=EMPTY_SET){
+  let lo=0,hi=totalBudget;
+  for(let it=0;it<20;it++){
+    const mid=(lo+hi)/2;
+    const{protAlloc,engAlloc}=buildProteinEnergyBlend(ani,veg,eng,mid,totalBudget,relaxIds);
+    const p=blendProteinPct(protAlloc,engAlloc,allIngById);
+    if(p<targetProtein)lo=mid;else hi=mid;
+  }
+  return hi;
+}
 
 function formuler(selectedIds, targetKey, quantityKg){
   const target=FEED_TARGETS[targetKey];
   const selected=INGREDIENTS.filter(i=>selectedIds.includes(i.id));
+  const allIngById=Object.fromEntries(selected.map(i=>[i.id,i]));
   const byFam={
     energetique:selected.filter(i=>i.family==="energetique"),
     proteine_veg:selected.filter(i=>i.family==="proteine_veg"),
     proteine_ani:selected.filter(i=>i.family==="proteine_ani"),
     mineral:selected.filter(i=>i.family==="mineral"),
     additif:selected.filter(i=>i.family==="additif"),
+    concentre:selected.filter(i=>i.family==="concentre"),
   };
-  const allProteins=[...byFam.proteine_ani,...byFam.proteine_veg];
+  // Les concentrés (mélanges commerciaux tout-en-un) sont traités comme des
+  // protéiques végétaux dans l'optimisation : pas de sous-plafond "animal",
+  // simplement une source de protéines/minéraux supplémentaire à répartir.
+  const vegLike=[...byFam.proteine_veg,...byFam.concentre];
+  const allProteins=[...byFam.proteine_ani,...vegLike];
+  const fixedAdditives=byFam.additif.filter(a=>a.id!=="methionine"&&a.id!=="lysine");
+  const aminoAdditives={methionine:byFam.additif.find(a=>a.id==="methionine"),lysine:byFam.additif.find(a=>a.id==="lysine")};
   const alerts=[];
 
+  // --- Blocages structurels : sans ces familles, aucune formule n'est possible ---
   if(!byFam.energetique.length){
     alerts.push({level:"critique",msg:"Aucune source d'énergie sélectionnée.",action:"Ajoutez au moins un ingrédient de la catégorie 🌽 Énergétiques (maïs, sorgho, mil...).",consequence:"La formule ne peut pas être établie sans base énergétique."});
     return{formula:null,alerts,target};
   }
-  if(!allProteins.length&&target.protein>14){
-    alerts.push({level:"critique",msg:`Cette ration requiert ${target.protein}% de protéines.`,action:"Ajoutez au moins un ingrédient de la catégorie 🌿 Protéiques végétaux ou 🐟 Protéiques animaux.",consequence:"Retard de croissance sévère, mauvais indice de consommation, mortalité élevée."});
+  if(!allProteins.length&&targetMin(target.protein)>14){
+    alerts.push({level:"critique",msg:`Cette ration requiert ${fmtTarget(target.protein,"%",1)} de protéines.`,action:"Ajoutez au moins un ingrédient de la catégorie 🌿 Protéiques végétaux, 🐟 Protéiques animaux ou 🧪 Concentrés.",consequence:"Retard de croissance sévère, mauvais indice de consommation, mortalité élevée."});
     return{formula:null,alerts,target};
   }
-  if(target.calcium>2&&!byFam.mineral.length){
-    alerts.push({level:"important",msg:`Cette phase nécessite ${target.calcium}% de calcium.`,action:"Ajoutez un ingrédient de la catégorie 🦴 Minéraux (coquilles d'huîtres, calcaire, farine d'os).",consequence:"Œufs à coquille molle, ostéoporose des pondeuses, chute de production."});
-  }
-  if(!byFam.additif.find(a=>a.id==="premix")){
-    alerts.push({level:"warning",msg:"Le prémix vitamines-minéraux n'est pas sélectionné.",action:"Ajoutez le Prémix vitamines-minéraux dans la catégorie ⚗️ Additifs si disponible.",consequence:"Carences en vitamines et oligo-éléments, baisse d'immunité et de performance."});
-  }
 
-  const formula=[];
-  let remaining=100;
-
-  // Additifs (doses fixes)
-  byFam.additif.forEach(ing=>{
-    const pct=ing.defaultPct||0.25;
-    formula.push({...ing,pct});
-    remaining-=pct;
-  });
-
-  // Minéraux
-  byFam.mineral.forEach(ing=>{
-    let pct;
-    if(target.calcium>2){
-      if(ing.id==="coquilles"||ing.id==="calcaire")pct=5;
-      else if(ing.id==="farine_os")pct=1.5;
-      else pct=1;
+  // --- Vérification mathématique de faisabilité, en deux paliers ---
+  // 1) Dans la limite du dosage RECOMMANDÉ de chaque ingrédient → si ça
+  //    suffit, rien à signaler. 2) Sinon, en poussant les ingrédients
+  //    naturels concernés jusqu'à 100% → si ça suffit, la cible reste
+  //    atteignable mais au prix d'un dépassement du dosage recommandé
+  //    (avertissement non bloquant). 3) Si même ça ne suffit pas, la cible
+  //    est réellement hors de portée avec cette sélection (blocage).
+  const relaxableProtein=new Set([...byFam.proteine_ani,...vegLike].map(i=>i.id));
+  const relaxableMineral=new Set(byFam.mineral.map(i=>i.id));
+  const relaxableEnergy=new Set(byFam.energetique.map(i=>i.id));
+  const nutrientChecks=[
+    {key:"protein",label:"Protéines",unit:"%",dec:1,relax:relaxableProtein,cat:"🌿 Protéiques végétaux ou 🐟 Protéiques animaux"},
+    {key:"energy",label:"Énergie",unit:" kcal/kg",dec:0,relax:relaxableEnergy,cat:"🌽 Énergétiques (ex. huile végétale)"},
+    {key:"calcium",label:"Calcium",unit:"%",dec:2,relax:relaxableMineral,cat:"🦴 Minéraux"},
+    {key:"phosphorus",label:"Phosphore",unit:"%",dec:2,relax:relaxableMineral,cat:"🦴 Minéraux"},
+    {key:"methionine",label:"Méthionine",unit:"%",dec:2,relax:relaxableProtein,cat:"🐟 Protéiques animaux ou ⚗️ Additif Méthionine"},
+    {key:"lysine",label:"Lysine",unit:"%",dec:2,relax:relaxableProtein,cat:"🐟 Protéiques animaux ou ⚗️ Additif Lysine"},
+  ];
+  const relaxNeeded=new Set();
+  nutrientChecks.forEach(nc=>{
+    const rawTarget=target[nc.key];
+    if(!rawTarget)return;
+    // Pour un intervalle, atteindre le minimum suffit à être "dans la cible" ;
+    // c'est donc le minimum qui sert de seuil de faisabilité.
+    const targetVal=targetMin(rawTarget);
+    const recommendedMax=theoreticalMaxNutrient(selected,nc.key);
+    if(recommendedMax>=targetVal*0.98)return;
+    const absoluteMax=theoreticalMaxNutrient(selected,nc.key,nc.relax);
+    if(absoluteMax<targetVal*0.98){
+      alerts.push({level:"critique",msg:`Cible de ${nc.label} (${fmtTarget(rawTarget,nc.unit,nc.dec)}) mathématiquement inatteignable avec les ingrédients sélectionnés (maximum possible, même en dosage élevé : ${absoluteMax.toFixed(nc.dec)}${nc.unit}).`,action:`Ajoutez un ingrédient plus riche en ${nc.label.toLowerCase()} — catégorie ${nc.cat}.`,consequence:"Aucune répartition des proportions ne peut combler cet écart."});
     }else{
-      if(ing.id==="coquilles"||ing.id==="calcaire")pct=1;
-      else if(ing.id==="farine_os")pct=1.5;
-      else pct=1;
-    }
-    pct=Math.min(pct,ing.maxPct);
-    formula.push({...ing,pct});
-    remaining-=pct;
-  });
-
-  // Calcul de la part protéique nécessaire
-  const avgEP=byFam.energetique.reduce((s,i)=>s+i.protein,0)/byFam.energetique.length/100;
-  const avgPP=allProteins.length>0?allProteins.reduce((s,i)=>s+i.protein,0)/allProteins.length/100:0;
-  let protShare=0;
-  if(allProteins.length>0&&(avgPP-avgEP)>0.01){
-    const tPF=target.protein/100;
-    protShare=(tPF-remaining/100*avgEP)/(avgPP-avgEP);
-    protShare=Math.max(0,Math.min(protShare,remaining*0.45));
-  }
-  const engShare=remaining-protShare;
-
-  // Protéines animales (priorité, max ~35% de la part protéique)
-  const aniTotal=Math.min(byFam.proteine_ani.length*6,protShare*0.35);
-  const vegTotal=protShare-aniTotal;
-  byFam.proteine_ani.forEach(ing=>{
-    const pct=Math.min(aniTotal/byFam.proteine_ani.length,ing.maxPct);
-    formula.push({...ing,pct:Math.round(pct*10)/10});
-  });
-  byFam.proteine_veg.forEach(ing=>{
-    if(byFam.proteine_veg.length>0){
-      const pct=Math.min(vegTotal/byFam.proteine_veg.length,ing.maxPct);
-      formula.push({...ing,pct:Math.round(pct*10)/10});
+      nc.relax.forEach(id=>relaxNeeded.add(id));
     }
   });
+  if(alerts.some(a=>a.level==="critique"))return{formula:null,alerts,target};
 
-  // Énergétiques — principal + secondaires
-  const mainEng=byFam.energetique.find(i=>i.id==="mais")||byFam.energetique.find(i=>i.id==="sorgho")||byFam.energetique.find(i=>i.id==="mil")||byFam.energetique[0];
-  const otherEng=byFam.energetique.filter(i=>i.id!==mainEng.id);
-  let otherEngTotal=0;
-  const otherEngAllocs=otherEng.map(ing=>{
-    const pct=Math.min(10,ing.maxPct,engShare*0.2);
-    otherEngTotal+=pct;
-    return{...ing,pct:Math.round(pct*10)/10};
-  });
-  const mainEngPct=Math.min(engShare-otherEngTotal,mainEng.maxPct);
-  formula.push({...mainEng,pct:Math.round(mainEngPct*10)/10});
-  otherEngAllocs.forEach(i=>formula.push(i));
+  // --- Budget : additifs fixes (prémix, sel...) ---
+  const usedPct={};
+  fixedAdditives.forEach(ing=>{usedPct[ing.id]=ing.defaultPct||0.25;});
+  const afterFixed=100-Object.values(usedPct).reduce((s,p)=>s+p,0);
 
-  // Normalisation à 100%
-  let total=formula.reduce((s,i)=>s+i.pct,0);
-  const diff=Math.round((100-total)*10)/10;
-  const mainIdx=formula.findIndex(i=>i.id===mainEng.id);
-  if(mainIdx>=0)formula[mainIdx].pct=Math.round((formula[mainIdx].pct+diff)*10)/10;
+  // --- Minéraux, dosés pour atteindre le calcium cible (assoupli si nécessaire) ---
+  const caAlloc=allocateForTarget(byFam.mineral,"calcium",targetMin(target.calcium||0),{},relaxNeeded);
+  Object.entries(caAlloc.allocations).forEach(([id,pct])=>{usedPct[id]=(usedPct[id]||0)+pct;});
 
-  // Recalcul final
-  const achievedProtein=formula.reduce((s,i)=>s+(i.protein/100)*(i.pct/100)*100,0);
-  const achievedEnergy=formula.reduce((s,i)=>s+i.energy*(i.pct/100),0);
-  const achievedCa=formula.reduce((s,i)=>s+(i.calcium/100)*(i.pct/100)*100,0);
+  // --- Protéines + énergie, optimisées par dichotomie (assoupli si nécessaire) ---
+  const proteinBudget=Math.max(0,afterFixed-Object.values(caAlloc.allocations).reduce((s,p)=>s+p,0));
+  const protShare=optimizeProtShare(byFam.proteine_ani,vegLike,byFam.energetique,targetMin(target.protein),proteinBudget,allIngById,relaxNeeded);
+  const{protAlloc,engAlloc,mainEngId}=buildProteinEnergyBlend(byFam.proteine_ani,vegLike,byFam.energetique,protShare,proteinBudget,relaxNeeded);
+  Object.entries(protAlloc).forEach(([id,pct])=>{usedPct[id]=(usedPct[id]||0)+pct;});
+  Object.entries(engAlloc).forEach(([id,pct])=>{usedPct[id]=(usedPct[id]||0)+pct;});
 
-  // Quantités
-  formula.forEach(i=>{ i.qtyKg=Math.round(i.pct/100*quantityKg*10)/10; });
-
-  // Alerte si protéines insuffisantes
-  if(achievedProtein<target.protein*0.85&&allProteins.length>0){
-    alerts.push({level:"warning",msg:`Protéines atteintes : ${achievedProtein.toFixed(1)}% (cible : ${target.protein}%).`,action:"Ajoutez un ingrédient protéique supplémentaire ou augmentez la proportion de ceux sélectionnés.",consequence:"Risque de retard de croissance ou de baisse de production."});
+  // --- Réconciliation énergie : recherche itérative locale entre l'ingrédient
+  // principal (maïs/sorgho/mil) et l'énergétique le plus concentré
+  // (typiquement l'huile) pour se rapprocher de la cible énergétique, DANS
+  // LES DEUX SENS. Avant, seul un déficit déclenchait une correction (on
+  // poussait l'huile) — un excès la laissait plafonnée à son maximum sans
+  // jamais la redescendre. Maintenant, si l'énergie dépasse la cible, on
+  // réduit l'ingrédient le plus concentré et on redonne la place au
+  // principal, jusqu'à revenir dans la fourchette ou à 0% de dépassement.
+  if(target.energy){
+    const lo=targetMin(target.energy);
+    const hi=isRange(target.energy)?targetMax(target.energy):target.energy*1.10;
+    const mid=(lo+hi)/2;
+    const mainEnergy=allIngById[mainEngId]?.energy||0;
+    // Candidats : énergétiques plus concentrés que le principal (huile...),
+    // triés du plus concentré au moins concentré — on ajuste le plus
+    // "puissant" en premier, c'est lui qui a le plus d'effet par point de %.
+    const candidates=[...byFam.energetique].filter(i=>i.id!==mainEngId&&i.energy>mainEnergy).sort((a,b)=>b.energy-a.energy);
+    const energyNow=()=>Object.entries(usedPct).reduce((s,[id,pct])=>s+pct*(allIngById[id]?.energy||0)/100,0);
+    for(const cand of candidates){
+      for(const step of[2,0.5,0.1]){
+        let guard=0;
+        while(guard<300){
+          guard++;
+          const cur=energyNow();
+          if(cur>=lo&&cur<=hi)break; // déjà dans la fourchette, rien à faire
+          const candPct=usedPct[cand.id]||0;
+          const mainPct=usedPct[mainEngId]||0;
+          if(cur>hi){
+            // Excès : redescend le candidat, redonne la place au principal.
+            if(candPct<step)break;
+            usedPct[cand.id]=Math.round((candPct-step)*100)/100;
+            usedPct[mainEngId]=Math.round((mainPct+step)*100)/100;
+            if(Math.abs(energyNow()-mid)>=Math.abs(cur-mid)){usedPct[cand.id]=candPct;usedPct[mainEngId]=mainPct;break;}
+          }else{
+            // Déficit : monte le candidat (au-delà de son maxPct si besoin,
+            // dans la limite de 100%), retire au principal.
+            if(mainPct<step||candPct+step>100)break;
+            usedPct[cand.id]=Math.round((candPct+step)*100)/100;
+            usedPct[mainEngId]=Math.round((mainPct-step)*100)/100;
+            if(Math.abs(energyNow()-mid)>=Math.abs(cur-mid)){usedPct[cand.id]=candPct;usedPct[mainEngId]=mainPct;break;}
+          }
+        }
+      }
+    }
+    candidates.forEach(cand=>{
+      if((usedPct[cand.id]||0)>cand.maxPct+0.05){
+        alerts.push({level:"important",msg:`${cand.name} est dosée à ${usedPct[cand.id]}% pour atteindre la cible énergétique, au-delà du dosage recommandé (${cand.maxPct}%).`,action:"Surveillez la tolérance digestive des animaux (fientes grasses), surtout chez les jeunes sujets, à ce niveau de dosage.",consequence:"Au-delà du seuil digestif recommandé, le risque de troubles digestifs augmente."});
+      }
+    });
   }
 
-  return{
-    formula:formula.sort((a,b)=>b.pct-a.pct),
-    alerts,target,
-    achieved:{protein:achievedProtein,energy:achievedEnergy,calcium:achievedCa}
+  // --- Complément phosphore si les minéraux calciques n'y suffisent pas ---
+  const phosphorusSoFar=Object.entries(usedPct).reduce((s,[id,pct])=>s+pct*(allIngById[id]?.phosphorus||0)/100,0);
+  const phosphorusTargetMin=targetMin(target.phosphorus||0);
+  if(target.phosphorus&&phosphorusSoFar<phosphorusTargetMin){
+    const pAlloc=allocateForTarget(byFam.mineral,"phosphorus",phosphorusTargetMin-phosphorusSoFar,usedPct,relaxNeeded);
+    Object.entries(pAlloc.allocations).forEach(([id,pct])=>{usedPct[id]=(usedPct[id]||0)+pct;});
+  }
+
+  // --- Complément méthionine / lysine via les acides aminés purs si sélectionnés ---
+  ["methionine","lysine"].forEach(key=>{
+    const targetVal=target[key];
+    if(!targetVal)return;
+    const soFar=Object.entries(usedPct).reduce((s,[id,pct])=>s+pct*(allIngById[id]?.[key]||0)/100,0);
+    const additive=aminoAdditives[key];
+    if(soFar<targetVal&&additive){
+      const gap=targetVal-soFar;
+      const headroom=additive.maxPct-(usedPct[additive.id]||0);
+      const take=additive[key]>0?Math.min(headroom,gap*100/additive[key]):0;
+      if(take>0)usedPct[additive.id]=(usedPct[additive.id]||0)+Math.round(take*100)/100;
+    }
+  });
+
+  // --- Réduction des excès (économie) : jusqu'ici, chaque étape ci-dessus
+  // ne fait qu'AJOUTER de la matière si une cible n'est pas atteinte — rien
+  // ne réduit un ingrédient qui apporte largement plus que nécessaire. Or
+  // les sources de protéines animales / concentrés (farine de viande et os,
+  // farine de poisson, concentré...) sont souvent très riches en calcium et
+  // phosphore : elles peuvent largement dépasser ces cibles "en bonus" sans
+  // que rien ne le corrige, ce qui gaspille de la matière première chère
+  // pour rien. Cette passe teste, petit pas par petit pas, si réduire un
+  // ingrédient concentré (protéines animales/végétales, minéraux,
+  // concentrés) au profit de l'ingrédient principal bon marché (maïs/
+  // sorgho/mil) rapproche l'ENSEMBLE des nutriments de leurs cibles — sans
+  // jamais accepter un mouvement qui ferait retomber un nutriment sous son
+  // minimum. Les énergétiques (huile) sont déjà traités séparément
+  // ci-dessus et les additifs de synthèse (prémix, sel, acides aminés purs)
+  // ne sont jamais touchés.
+  {
+    const NUTRIENT_KEYS=["protein","energy","calcium","phosphorus","methionine","lysine"];
+    const computeAchieved=()=>{
+      const a={protein:0,energy:0,calcium:0,phosphorus:0,methionine:0,lysine:0};
+      Object.entries(usedPct).forEach(([id,pct])=>{
+        const ing=allIngById[id];if(!ing)return;
+        NUTRIENT_KEYS.forEach(k=>{a[k]+=pct*(ing[k]||0)/100;});
+      });
+      return a;
+    };
+    // Coût d'un écart : très pénalisé sous le minimum — un terme fixe dès le
+    // franchissement du seuil (et non seulement un terme qui croît depuis
+    // zéro à la frontière) pour que la recherche s'arrête net à la cible
+    // plutôt que de la franchir légèrement quand ça permet de gagner
+    // beaucoup ailleurs. Au-dessus du minimum, coût léger mais continu (le
+    // "gaspillage" qu'on veut réduire), et coût fort au-delà d'un vrai
+    // maximum quand la source fournit un intervalle.
+    const penalty=a=>{
+      let p=0;
+      NUTRIENT_KEYS.forEach(key=>{
+        const t=target[key];if(!t)return;
+        const lo=targetMin(t);
+        const val=a[key];
+        if(val<lo){p+=5+50*((lo-val)/lo)**2;}
+        else if(isRange(t)){const hi=targetMax(t);if(val>hi)p+=((val-hi)/hi)**2;}
+        else{p+=0.6*((val-lo)/lo)**2;}
+      });
+      return p;
+    };
+    // Les énergétiques secondaires (huile...) sont inclus ici aussi : l'huile
+    // qui reste à son plafond juste parce que l'énergie est "dans la
+    // fourchette tolérée" (±10%) n'est pas forcément nécessaire — si la
+    // redonner au maïs permet de rester quand même au-dessus du minimum,
+    // c'est une économie, exactement comme pour le calcium/phosphore/
+    // protéines. Seul l'ingrédient principal (maïs/sorgho/mil) n'est jamais
+    // un candidat, puisque c'est justement lui qui récupère la place libérée.
+    const trimFamilies=new Set(["mineral","proteine_ani","proteine_veg","concentre","energetique"]);
+    const candidates=Object.keys(usedPct).filter(id=>id!==mainEngId&&trimFamilies.has(allIngById[id]?.family)&&(usedPct[id]||0)>0);
+    for(const step of[3,1,0.25,0.05]){
+      let improved=true,guard=0;
+      while(improved&&guard<400){
+        improved=false;guard++;
+        for(const id of candidates){
+          const pct=usedPct[id]||0;
+          if(pct<step)continue;
+          const mainPct=usedPct[mainEngId]||0;
+          const before=penalty(computeAchieved());
+          usedPct[id]=Math.round((pct-step)*100)/100;
+          usedPct[mainEngId]=Math.round((mainPct+step)*100)/100;
+          const after=penalty(computeAchieved());
+          if(after<before-1e-9){improved=true;}
+          else{usedPct[id]=pct;usedPct[mainEngId]=mainPct;}
+        }
+      }
+    }
+  }
+
+  // --- Normalisation finale à 100%, ajustée sur l'ingrédient énergétique principal ---
+  const total=Object.values(usedPct).reduce((s,p)=>s+p,0);
+  const diff=Math.round((100-total)*100)/100;
+  usedPct[mainEngId]=Math.max(0,Math.round(((usedPct[mainEngId]||0)+diff)*100)/100);
+
+  // --- Construction de la formule finale ---
+  const formula=Object.entries(usedPct).filter(([,pct])=>pct>0.001).map(([id,pct])=>({...allIngById[id],pct,qtyKg:Math.round(pct/100*quantityKg*100)/100}));
+
+  // --- Avertissement (non bloquant) pour tout ingrédient poussé au-delà de
+  // son dosage recommandé afin d'atteindre les cibles nutritionnelles ---
+  const dosageRisk={proteine_veg:"peut apporter des facteurs antinutritionnels ou un risque accru d'aflatoxines à haute dose",proteine_ani:"peut présenter un risque sanitaire (qualité variable, excès de sel) à haute dose",mineral:"peut déséquilibrer le rapport calcium/phosphore à haute dose",concentre:"peut créer un déséquilibre vitaminique/minéral par surdosage si combiné à d'autres sources concentrées"};
+  const huileIds=new Set(["huile_vegetale","huile_rouge"]);
+  formula.forEach(ing=>{
+    if(huileIds.has(ing.id))return; // avertissement spécifique (tolérance digestive) ci-dessous
+    if(relaxNeeded.has(ing.id)&&ing.pct>ing.maxPct+0.05){
+      alerts.push({level:"important",msg:`${ing.name} est dosé à ${ing.pct}% pour atteindre les cibles nutritionnelles, au-delà du maximum habituellement recommandé (${ing.maxPct}%).`,action:`Vérifiez la qualité de cet ingrédient et surveillez les animaux ; un ingrédient complémentaire de la même catégorie permettrait de réduire ce dosage.`,consequence:`Au-delà du dosage recommandé, cet ingrédient ${dosageRisk[ing.family]||"peut présenter un risque à haute dose"}.`});
+    }
+  });
+  // --- Avertissement spécifique aux huiles : le plafond est une limite de
+  // tolérance digestive (fientes grasses, surtout chez les jeunes), pas une
+  // toxicité. On avertit déjà en s'approchant du seuil, pas seulement au
+  // dépassement. (Le dépassement lui-même, s'il vient du complément
+  // d'énergie ci-dessus, a déjà généré son propre avertissement "Important" ;
+  // on évite ici de le dupliquer.)
+  formula.forEach(ing=>{
+    if(!huileIds.has(ing.id))return;
+    const alreadyWarned=alerts.some(a=>a.msg.startsWith(ing.name)&&a.msg.includes("déficit énergétique"));
+    if(ing.pct>ing.maxPct+0.05&&!alreadyWarned){
+      alerts.push({level:"important",msg:`${ing.name} est dosée à ${ing.pct}%, au-delà du seuil de tolérance digestive recommandé (${ing.maxPct}%).`,action:"Surveillez l'aspect des fientes (grasses/luisantes), en particulier chez les jeunes sujets ; réduisez si des signes apparaissent.",consequence:"Au-delà de ce seuil, le risque de troubles digestifs augmente, surtout chez les jeunes animaux."});
+    }else if(ing.pct>=ing.maxPct*0.8&&ing.pct<=ing.maxPct+0.05){
+      alerts.push({level:"warning",msg:`${ing.name} est dosée à ${ing.pct}%, proche du seuil de tolérance digestive (${ing.maxPct}%).`,action:"Aucune action requise dans l'immédiat, mais surveillez l'aspect des fientes si ce dosage venait à augmenter.",consequence:"Un dosage plus élevé pourrait entraîner des fientes grasses, surtout chez les jeunes sujets."});
+    }
+  });
+
+  const achieved={
+    protein:formula.reduce((s,i)=>s+(i.protein/100)*(i.pct/100)*100,0),
+    energy:formula.reduce((s,i)=>s+i.energy*(i.pct/100),0),
+    calcium:formula.reduce((s,i)=>s+(i.calcium/100)*(i.pct/100)*100,0),
+    phosphorus:formula.reduce((s,i)=>s+(i.phosphorus/100)*(i.pct/100)*100,0),
+    methionine:formula.reduce((s,i)=>s+(i.methionine/100)*(i.pct/100)*100,0),
+    lysine:formula.reduce((s,i)=>s+(i.lysine/100)*(i.pct/100)*100,0),
   };
+
+  // --- Contrôle final honnête : la répartition retenue par l'algorithme
+  // (centrée sur la cible de protéines) peut laisser un léger écart sur un
+  // autre paramètre même quand la cible était théoriquement atteignable.
+  // On le signale ici plutôt que de le laisser passer silencieusement.
+  const finalChecks=[
+    {key:"energy",label:"Énergie",unit:" kcal/kg",dec:0,cat:"🌽 Énergétiques (ex. huile végétale)"},
+    {key:"calcium",label:"Calcium",unit:"%",dec:2,cat:"🦴 Minéraux"},
+    {key:"phosphorus",label:"Phosphore",unit:"%",dec:2,cat:"🦴 Minéraux"},
+    {key:"methionine",label:"Méthionine",unit:"%",dec:2,cat:"🐟 Protéiques animaux ou ⚗️ Additif Méthionine"},
+    {key:"lysine",label:"Lysine",unit:"%",dec:2,cat:"🐟 Protéiques animaux ou ⚗️ Additif Lysine"},
+  ];
+  finalChecks.forEach(fc=>{
+    const rawTarget=target[fc.key];
+    if(!rawTarget)return;
+    const a=achieved[fc.key];
+    // Intervalle réel {min,max} : on n'alerte que si le résultat sort de la
+    // fourchette (sous le min ou au-dessus du max). Valeur unique : on garde
+    // la tolérance ±8-10% déjà en place, faute d'une vraie fourchette source.
+    const lo=isRange(rawTarget)?targetMin(rawTarget):rawTarget*0.92;
+    if(a<lo&&!alerts.some(al=>al.msg.includes(fc.label))){
+      alerts.push({level:"important",msg:`${fc.label} atteint(e) avec cette répartition : ${a.toFixed(fc.dec)}${fc.unit} pour une cible de ${fmtTarget(rawTarget,fc.unit,fc.dec)}.`,action:`Ajoutez ou augmentez un ingrédient riche en ${fc.label.toLowerCase()} — catégorie ${fc.cat}.`,consequence:`Un écart prolongé en ${fc.label.toLowerCase()} peut ralentir la croissance ou la production.`});
+    }else if(isRange(rawTarget)&&a>targetMax(rawTarget)&&!alerts.some(al=>al.msg.includes(fc.label))){
+      alerts.push({level:"important",msg:`${fc.label} atteint(e) avec cette répartition : ${a.toFixed(fc.dec)}${fc.unit}, au-dessus de la fourchette cible (${fmtTarget(rawTarget,fc.unit,fc.dec)}) pour cette phase.`,action:`Réduisez la part d'ingrédients riches en ${fc.label.toLowerCase()}.`,consequence:`Un excès prolongé en ${fc.label.toLowerCase()} peut aussi nuire à la croissance ou à la production.`});
+    }
+  });
+
+  // --- Cas particulier de l'énergie : contrairement aux autres paramètres à
+  // valeur unique, un EXCÈS peut aussi poser problème même hors intervalle
+  // déclaré (ex. sujets ponte volontairement maintenus en dessous de
+  // l'énergie de croissance pour éviter un excès de poids qui réduit la
+  // ponte). On signale donc aussi le dépassement au-delà de +10%, sauf si
+  // c'est déjà couvert par une vraie fourchette ci-dessus.
+  if(target.energy&&!isRange(target.energy)&&achieved.energy>target.energy*1.10){
+    alerts.push({level:"important",msg:`Énergie atteinte avec cette répartition : ${Math.round(achieved.energy)} kcal/kg, au-dessus de la cible de ${target.energy} kcal/kg pour cette phase.`,action:"Réduisez la part d'ingrédients très énergétiques (huiles, manioc) ou ajoutez un ingrédient plus fibreux/moins énergétique pour diluer.",consequence:"Un excès d'énergie prolongé peut entraîner une prise de poids excessive, particulièrement pénalisante sur une phase où l'énergie est volontairement limitée (ex. ponte)."});
+  }
+
+  return{formula:formula.sort((a,b)=>b.pct-a.pct),alerts,target,achieved};
 }
 
 // ═══════════════════════════════════════════
@@ -514,6 +856,7 @@ const addDays=(d,n)=>{const r=new Date(d);r.setDate(r.getDate()+n);return r;};
 const fmtDate=d=>d?new Date(d).toLocaleDateString("fr-FR",{day:"2-digit",month:"short",year:"numeric"}):"";
 const fmtCFA=n=>new Intl.NumberFormat("fr-FR").format(Math.round(n||0))+" F";
 const genId=()=>Math.random().toString(36).slice(2,11);
+const fmtQty=kg=>{const g=kg*1000;return g<100?`${Math.round(g)} g`:`${kg} kg`;};
 const today=()=>new Date().toISOString().split("T")[0];
 
 function useStorage(key,fallback=null){
@@ -612,7 +955,7 @@ function IncubationModule({onBack,registerBack}){
     const egg=EGG_TYPES[form.type];
     if(!egg||!form.dateStart||!form.qty||!form.ambientTemp)return;
     const start=new Date(form.dateStart);
-    const item={id:genId(),form:{...form},eclosion:addDays(start,egg.days).toISOString(),eclosionStart:addDays(start,egg.eclosionStart-1).toISOString(),eclosionEnd:addDays(start,egg.eclosionWindow[1]-1).toISOString(),mirages:egg.mirage.map(d=>({day:d,date:addDays(start,d-1).toISOString()})),stopDate:addDays(start,egg.stopTurn-1).toISOString(),at:new Date().toISOString()};
+    const item={id:genId(),form:{...form},eclosion:addDays(start,egg.days).toISOString(),eclosionStart:addDays(start,egg.eclosionStart-1).toISOString(),eclosionEnd:addDays(start,egg.eclosionWindow[1]-1).toISOString(),mirages:egg.mirage.map(d=>({day:d,date:addDays(start,d-1).toISOString()})),stopDate:addDays(start,egg.stopTurn-1).toISOString(),humidStart:egg.humid?addDays(start,egg.humid[0]-1).toISOString():null,humidEnd:egg.humid?addDays(start,egg.humid[1]-1).toISOString():null,at:new Date().toISOString()};
     saveHist([item,...(hist||[])].slice(0,20));
     setSelHist(item);setScreen("result");
   };
@@ -676,6 +1019,7 @@ function IncubationModule({onBack,registerBack}){
           <div style={{fontWeight:800,fontSize:14,marginBottom:12}}>📅 Dates clés</div>
           <Row label="Mise en incubation" value={fmtDate(selHist.form.dateStart)}/>
           {selHist.mirages?.map(m=><Row key={m.day} label={`Mirage (J${m.day})`} value={fmtDate(m.date)}/>)}
+          {egg?.humid&&<Row label={`Humidification externe (J${egg.humid[0]}–J${egg.humid[1]})`} value={`${fmtDate(selHist.humidStart)} – ${fmtDate(selHist.humidEnd)}`}/>}
           <Row label={`Arrêt retournement (J${egg?.stopTurn})`} value={fmtDate(selHist.stopDate)}/>
           <Row label={`Début d'éclosion (J${egg?.eclosionStart})`} value={fmtDate(selHist.eclosionStart)}/>
           <Row label={`Fenêtre (J${egg?.eclosionWindow[0]}–J${egg?.eclosionWindow[1]})`} value={`${fmtDate(selHist.eclosionStart)} – ${fmtDate(selHist.eclosionEnd)}`} accent/>
@@ -758,6 +1102,7 @@ function IncubationModule({onBack,registerBack}){
           <div style={{fontWeight:800,color:C.green,marginBottom:12,fontSize:14}}>📅 Dates clés</div>
           <Row label="Mise en incubation" value={fmtDate(selHist.form.dateStart)}/>
           {selHist.mirages.map(m=><Row key={m.day} label={`Mirage (J${m.day})`} value={fmtDate(m.date)}/>)}
+          {egg.humid&&<Row label={`Humidification externe (J${egg.humid[0]}–J${egg.humid[1]})`} value={`${fmtDate(selHist.humidStart)} – ${fmtDate(selHist.humidEnd)}`}/>}
           <Row label={`Arrêt retournement (J${egg.stopTurn})`} value={fmtDate(selHist.stopDate)}/>
           <Row label={`Début d'éclosion (J${egg.eclosionStart})`} value={fmtDate(selHist.eclosionStart)}/>
           <Row label={`Fenêtre (J${egg.eclosionWindow[0]}–J${egg.eclosionWindow[1]})`} value={`${fmtDate(selHist.eclosionStart)} – ${fmtDate(selHist.eclosionEnd)}`} accent/>
@@ -874,7 +1219,7 @@ function FormuleModule({onBack,registerBack}){
               <div style={{display:"grid",gridTemplateColumns:"1fr 60px 70px",gap:8,padding:"8px 12px",background:"#E8E8E8"}}>
                 <div style={{fontSize:11,fontWeight:800,color:C.muted}}>INGRÉDIENT</div>
                 <div style={{fontSize:11,fontWeight:800,color:C.muted,textAlign:"center"}}>%</div>
-                <div style={{fontSize:11,fontWeight:800,color:C.muted,textAlign:"right"}}>KG</div>
+                <div style={{fontSize:11,fontWeight:800,color:C.muted,textAlign:"right"}}>QTÉ</div>
               </div>
               {result.formula.map((ing,i)=>{
                 const catColor=INGREDIENT_CATS.find(c=>c.id===ing.family)?.color||C.muted;
@@ -884,14 +1229,14 @@ function FormuleModule({onBack,registerBack}){
                     <div style={{fontSize:10,color:catColor,fontWeight:700,marginTop:1}}>{INGREDIENT_CATS.find(c=>c.id===ing.family)?.label}</div>
                   </div>
                   <div style={{textAlign:"center",fontSize:14,fontWeight:900,color:C.text}}>{ing.pct}%</div>
-                  <div style={{textAlign:"right",fontSize:14,fontWeight:900,color:C.green}}>{ing.qtyKg} kg</div>
+                  <div style={{textAlign:"right",fontSize:14,fontWeight:900,color:C.green}}>{fmtQty(ing.qtyKg)}</div>
                 </div>);
               })}
               {/* Total */}
               <div style={{display:"grid",gridTemplateColumns:"1fr 60px 70px",gap:8,padding:"10px 12px",background:"#E8F5EC",borderTop:`2px solid ${C.green}`}}>
                 <div style={{fontSize:13,fontWeight:900}}>TOTAL</div>
                 <div style={{textAlign:"center",fontSize:14,fontWeight:900,color:C.green}}>100%</div>
-                <div style={{textAlign:"right",fontSize:14,fontWeight:900,color:C.green}}>{quantity} kg</div>
+                <div style={{textAlign:"right",fontSize:14,fontWeight:900,color:C.green}}>{fmtQty(parseFloat(quantity))}</div>
               </div>
             </div>
           </div>
@@ -901,13 +1246,16 @@ function FormuleModule({onBack,registerBack}){
             <div style={{fontWeight:800,color:C.green,marginBottom:10}}>📊 Valeurs nutritionnelles estimées</div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
               {[
-                {label:"Protéines",achieved:result.achieved.protein.toFixed(1)+"%",target:result.target.protein+"%",ok:result.achieved.protein>=result.target.protein*0.9},
-                {label:"Énergie",achieved:Math.round(result.achieved.energy)+" kcal/kg",target:result.target.energy+" kcal/kg",ok:true},
-                {label:"Calcium",achieved:result.achieved.calcium.toFixed(2)+"%",target:result.target.calcium+"%",ok:result.achieved.calcium>=result.target.calcium*0.7},
+                {label:"Énergie",achieved:Math.round(result.achieved.energy)+" kcal/kg",raw:result.target.energy,unit:" kcal/kg",dec:0,ok:result.achieved.energy>=targetMin(result.target.energy)*0.9&&result.achieved.energy<=(isRange(result.target.energy)?targetMax(result.target.energy):Infinity)},
+                {label:"Protéines",achieved:result.achieved.protein.toFixed(1)+"%",raw:result.target.protein,unit:"%",dec:1,ok:result.achieved.protein>=targetMin(result.target.protein)*0.9},
+                {label:"Calcium",achieved:result.achieved.calcium.toFixed(2)+"%",raw:result.target.calcium,unit:"%",dec:2,ok:result.achieved.calcium>=targetMin(result.target.calcium)*0.9},
+                {label:"Phosphore",achieved:result.achieved.phosphorus.toFixed(2)+"%",raw:result.target.phosphorus,unit:"%",dec:2,ok:result.achieved.phosphorus>=targetMin(result.target.phosphorus)*0.9},
+                {label:"Méthionine",achieved:result.achieved.methionine.toFixed(2)+"%",raw:result.target.methionine||0,unit:"%",dec:2,ok:result.achieved.methionine>=targetMin(result.target.methionine||0)*0.9},
+                {label:"Lysine",achieved:result.achieved.lysine.toFixed(2)+"%",raw:result.target.lysine||0,unit:"%",dec:2,ok:result.achieved.lysine>=targetMin(result.target.lysine||0)*0.9},
               ].map((v,i)=>(<div key={i} style={{background:v.ok?"#fff":C.orangeLt,borderRadius:10,padding:"10px 12px",border:`1px solid ${v.ok?C.border:C.orange}22`}}>
                 <div style={{fontSize:11,color:C.muted,marginBottom:4}}>{v.label}</div>
                 <div style={{fontSize:16,fontWeight:900,color:v.ok?C.green:C.orange}}>{v.achieved}</div>
-                <div style={{fontSize:10,color:C.muted}}>Cible : {v.target}</div>
+                <div style={{fontSize:10,color:C.muted}}>Cible : {fmtTarget(v.raw,v.unit,v.dec)}</div>
               </div>))}
             </div>
           </div>
@@ -982,7 +1330,7 @@ function FormuleModule({onBack,registerBack}){
             <div style={{display:"grid",gridTemplateColumns:"1fr",gap:8,marginBottom:20}}>
               {FEED_TYPE_PHASES[animalType].phases.map(p=>(<button key={p.id} onClick={()=>setPhase(p.id)} style={{background:phase===p.id?C.orange:C.bg,color:phase===p.id?"#fff":C.text,border:`2px solid ${phase===p.id?C.orange:C.border}`,borderRadius:10,padding:"12px 14px",cursor:"pointer",fontFamily:"'Nunito',sans-serif",fontWeight:700,fontSize:13,textAlign:"left",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                 <span>{p.label}</span>
-                {phase===p.id&&<span style={{fontSize:11,opacity:.8}}>Protéines cible : {FEED_TARGETS[p.id]?.protein}%</span>}
+                {phase===p.id&&<span style={{fontSize:11,opacity:.8}}>Protéines cible : {fmtTarget(FEED_TARGETS[p.id]?.protein,"%",1)}</span>}
               </button>))}
             </div>
           </>)}
@@ -1503,6 +1851,13 @@ export default function App(){
   const[exitToast,setExitToast]=useState(false);
   const moduleBackRef=useRef(null);
   const exitTimerRef=useRef(null);
+  // Refs toujours à jour : le listener popstate est enregistré une seule
+  // fois (voir plus bas) et ne doit jamais lire un état "screen"/"exitToast"
+  // périmé issu d'une closure obsolète.
+  const screenRef=useRef(screen);
+  const exitToastRef=useRef(exitToast);
+  screenRef.current=screen;
+  exitToastRef.current=exitToast;
 
   const registerBack=useCallback(handler=>{moduleBackRef.current=handler;},[]);
 
@@ -1511,28 +1866,46 @@ export default function App(){
     history.pushState({screen:s},"");
   },[]);
 
-  useEffect(()=>{
+  // Retour direct à l'accueil (bouton "Retour" affiché dans l'UI d'un module).
+  // Contrairement à goTo(), on REMPLACE l'entrée d'historique du module au
+  // lieu d'en empiler une nouvelle : sinon, des entrées "accueil" s'accumulent
+  // à chaque aller-retour dans un module, et le bouton retour physique
+  // d'Android finit par quitter l'application avant d'être repassé par
+  // l'accueil (bug de l'avant-dernière page).
+  const goHome=useCallback(()=>{
+    moduleBackRef.current=null;
+    setScreen("home");
     history.replaceState({screen:"home"},"");
+  },[]);
+
+  useEffect(()=>{
+    // On empile un état tampon dès le montage (en plus du replaceState) afin
+    // qu'un popstate se déclenche systématiquement, y compris au tout premier
+    // appui sur "retour" depuis l'accueil — sinon, sur certains WebView
+    // Android, l'absence d'un deuxième niveau d'historique fait quitter
+    // l'application immédiatement sans jamais passer par notre gestionnaire.
+    history.replaceState({screen:"home"},"");
+    history.pushState({screen:"home"},"");
 
     const handlePop=()=>{
-      history.pushState(null,""); // Maintenir l'état dans l'historique
-
-      if(screen==="home"){
-        // Sur l'accueil : toast de confirmation de sortie
-        if(exitToast){
-          // Deuxième appui → quitter
-          window.history.go(-2);
-        }else{
-          setExitToast(true);
-          if(exitTimerRef.current)clearTimeout(exitTimerRef.current);
-          exitTimerRef.current=setTimeout(()=>setExitToast(false),2500);
+      const curScreen=screenRef.current;
+      if(curScreen==="home"){
+        if(exitToastRef.current){
+          // Deuxième appui confirmé : on laisse la sortie se faire, sans
+          // réempiler d'état tampon.
+          return;
         }
+        history.pushState({screen:"home"},"");
+        setExitToast(true);
+        if(exitTimerRef.current)clearTimeout(exitTimerRef.current);
+        exitTimerRef.current=setTimeout(()=>setExitToast(false),2500);
       }else{
-        // Dans un module : essayer le back handler du module d'abord
+        // Dans un module : on maintient systématiquement la profondeur
+        // d'historique, puis on délègue au back handler du module.
+        history.pushState({screen:curScreen},"");
         if(moduleBackRef.current){
           const handled=moduleBackRef.current();
           if(!handled){
-            // Module ne peut plus reculer → retour à l'accueil
             setScreen("home");
             moduleBackRef.current=null;
           }
@@ -1547,17 +1920,17 @@ export default function App(){
       window.removeEventListener("popstate",handlePop);
       if(exitTimerRef.current)clearTimeout(exitTimerRef.current);
     };
-  },[screen,exitToast]);
+  },[]);
 
   const moduleProps={registerBack};
 
   const screens={
     home:<HomeScreen go={goTo}/>,
-    incubation:<IncubationModule onBack={()=>goTo("home")} {...moduleProps}/>,
-    formule:<FormuleModule onBack={()=>goTo("home")} {...moduleProps}/>,
-    maladies:<MaladiesModule onBack={()=>goTo("home")} {...moduleProps}/>,
-    formations:<FormationsModule onBack={()=>goTo("home")} {...moduleProps}/>,
-    tresorerie:<TresorerieModule onBack={()=>goTo("home")} {...moduleProps}/>,
+    incubation:<IncubationModule onBack={goHome} {...moduleProps}/>,
+    formule:<FormuleModule onBack={goHome} {...moduleProps}/>,
+    maladies:<MaladiesModule onBack={goHome} {...moduleProps}/>,
+    formations:<FormationsModule onBack={goHome} {...moduleProps}/>,
+    tresorerie:<TresorerieModule onBack={goHome} {...moduleProps}/>,
   };
 
   return(<>
