@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useCollection, useSyncStatus, clearLocalUserData } from "./store.jsx";
 import { supabase } from "./supabase.js";
+import { farmNameOf } from "./Auth.jsx";
 
 // ═══════════════════════════════════════════
 //  DONNÉES — INCUBATION
@@ -892,16 +893,25 @@ function AccountBar({user}){
   const{syncStatus,pendingCount,syncNow}=useSyncStatus();
   const[icon,label]=SYNC_LABELS[syncStatus]||SYNC_LABELS.syncing;
   const detail=syncStatus==="offline"&&pendingCount>0?` · ${pendingCount} modif. en attente`:"";
+  const farmName=farmNameOf(user);
+  const renameFarm=async()=>{
+    const name=window.prompt("Nom de votre ferme :",farmName);
+    if(name===null||!name.trim()||name.trim()===farmName)return;
+    const{error}=await supabase.auth.updateUser({data:{farm_name:name.trim().slice(0,60)}});
+    if(error)window.alert("Impossible d'enregistrer le nom pour l'instant. Vérifiez votre connexion internet.");
+  };
   const logout=async()=>{
     if(pendingCount>0&&!window.confirm(`${pendingCount} modification(s) ne sont pas encore sauvegardées en ligne et seront perdues. Se déconnecter quand même ?`))return;
     await supabase.auth.signOut();
     clearLocalUserData(user.id);
   };
   return(
-    <div style={{marginTop:14,display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
-      <button onClick={syncNow} style={{background:"rgba(255,255,255,.18)",border:"none",borderRadius:20,padding:"5px 11px",color:"#fff",fontSize:11,fontWeight:800,cursor:"pointer",fontFamily:"'Nunito',sans-serif"}}>{icon} {label}{detail}</button>
-      <div style={{fontSize:11,opacity:.75,flex:1,minWidth:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{user?.email}</div>
-      <button onClick={logout} style={{background:"transparent",border:"1.5px solid rgba(255,255,255,.5)",borderRadius:20,padding:"4px 11px",color:"#fff",fontSize:11,fontWeight:800,cursor:"pointer",fontFamily:"'Nunito',sans-serif"}}>Déconnexion</button>
+    <div style={{marginTop:14}}>
+      <button onClick={renameFarm} title="Modifier le nom de la ferme" style={{background:"none",border:"none",color:"#fff",fontSize:16,fontWeight:900,cursor:"pointer",fontFamily:"'Nunito',sans-serif",maxWidth:"100%",textAlign:"left",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",padding:0,opacity:farmName?1:.85,display:"block"}}>🏡 {farmName||"Nommer ma ferme"} <span style={{fontSize:12,opacity:.7}}>✎</span></button>
+      <div style={{marginTop:10,display:"flex",alignItems:"center",justifyContent:"space-between",gap:8}}>
+        <button onClick={syncNow} style={{background:"rgba(255,255,255,.18)",border:"none",borderRadius:20,padding:"5px 11px",color:"#fff",fontSize:11,fontWeight:800,cursor:"pointer",fontFamily:"'Nunito',sans-serif",minWidth:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{icon} {label}{detail}</button>
+        <button onClick={logout} style={{background:"transparent",border:"1.5px solid rgba(255,255,255,.5)",borderRadius:20,padding:"4px 11px",color:"#fff",fontSize:11,fontWeight:800,cursor:"pointer",fontFamily:"'Nunito',sans-serif",flexShrink:0}}>Déconnexion</button>
+      </div>
     </div>
   );
 }
@@ -926,7 +936,7 @@ function HomeScreen({go,user}){
       </div>
       <div style={{padding:"18px 16px"}}>
         <div style={{fontSize:11,fontWeight:800,color:C.muted,marginBottom:12,letterSpacing:.8,textTransform:"uppercase"}}>Modules</div>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
+        <div className="avi-modules">
           {modules.map(m=>(<button key={m.id} onClick={()=>go(m.id)} style={{background:m.bg,border:`1.5px solid ${m.accent}22`,borderRadius:16,padding:"16px 14px",cursor:"pointer",textAlign:"left"}}><div style={{fontSize:26,marginBottom:8}}>{m.icon}</div><div style={{fontSize:13,fontWeight:900,color:m.accent,lineHeight:1.3,marginBottom:4}}>{m.label}</div><div style={{fontSize:11,color:C.muted,lineHeight:1.4}}>{m.desc}</div></button>))}
         </div>
         <button onClick={()=>go("tresorerie")} style={{background:"#F5EDFB",border:`1.5px solid ${C.purple}22`,borderRadius:16,padding:"16px 18px",cursor:"pointer",width:"100%",textAlign:"left",display:"flex",alignItems:"center",gap:16}}>
@@ -1955,9 +1965,19 @@ export default function App({user}){
       button{transition:transform .1s,opacity .1s;}
       button:active{transform:scale(0.97);opacity:.9;}
       input:focus{border-color:#2A7A40!important;box-shadow:0 0 0 3px rgba(42,122,64,.12);}
+      body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
+      .avi-page{background:#C8D4C0;min-height:100vh;display:flex;justify-content:center;align-items:flex-start;}
+      .avi-shell{width:100%;max-width:430px;background:#F2F5EE;min-height:100vh;overflow-x:hidden;position:relative;}
+      .avi-modules{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+      /* Ordinateur / tablette : l'app occupe plus de place au lieu d'une colonne de téléphone. */
+      @media (min-width:768px){
+        .avi-page{padding:24px 16px;}
+        .avi-shell{max-width:760px;min-height:calc(100vh - 48px);border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.12);}
+        .avi-modules{grid-template-columns:repeat(4,1fr);}
+      }
     `}</style>
-    <div style={{background:"#C8D4C0",minHeight:"100vh",display:"flex",justifyContent:"center",alignItems:"flex-start",padding:"16px 0"}}>
-      <div style={{width:"100%",maxWidth:430,background:"#F2F5EE",minHeight:"100vh",boxShadow:"0 8px 40px rgba(0,0,0,.18)",borderRadius:8,overflowY:"auto",overflowX:"hidden",position:"relative"}}>
+    <div className="avi-page">
+      <div className="avi-shell">
         {Module?<Module onBack={goHome} {...moduleProps}/>:<HomeScreen go={goTo} user={user}/>}
         {/* Toast "Appuyez encore pour quitter" */}
         {exitToast&&(<div style={{position:"fixed",bottom:32,left:"50%",transform:"translateX(-50%)",background:"rgba(0,0,0,.82)",color:"#fff",borderRadius:24,padding:"10px 20px",fontSize:13,fontWeight:700,zIndex:9999,whiteSpace:"nowrap",boxShadow:"0 4px 20px rgba(0,0,0,.3)"}}>Appuyez encore pour quitter</div>)}

@@ -68,8 +68,49 @@ function LinkButton({ onClick, children }) {
   return <button type="button" onClick={onClick} style={{ background: 'none', border: 'none', color: C.green, fontSize: 14, fontWeight: 800, cursor: 'pointer', fontFamily: font }}>{children}</button>;
 }
 
+// Nom de la ferme, affiché dans l'app à la place de l'adresse e-mail.
+export const farmNameOf = (user) => (user?.user_metadata?.farm_name || '').trim();
+
+// Après l'inscription : page dédiée pour ne pas laisser la personne recliquer sur « Créer mon compte ».
+function CheckEmailScreen({ email, redirectTo, onLogin }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const [info, setInfo] = useState('');
+
+  const resend = async () => {
+    setBusy(true); setError(''); setInfo('');
+    const { error: err } = await supabase.auth.resend({ type: 'signup', email, options: { emailRedirectTo: redirectTo } });
+    setBusy(false);
+    if (err) setError(messageErreur(err));
+    else setInfo('E-mail renvoyé. Pensez à regarder dans les spams.');
+  };
+
+  return (
+    <Shell title="Vérifiez votre e-mail 📩" subtitle="Votre compte est créé. Il reste une étape pour l’activer.">
+      {error && <Notice tone="error">{error}</Notice>}
+      {info && <Notice>{info}</Notice>}
+      <div style={{ background: C.greenLt, borderRadius: 12, padding: 14, marginBottom: 16, fontSize: 14, color: C.text, lineHeight: 1.6 }}>
+        Nous avons envoyé un lien de confirmation à<br />
+        <strong style={{ wordBreak: 'break-all' }}>{email}</strong>
+      </div>
+      <ol style={{ paddingLeft: 20, fontSize: 14, color: C.text, lineHeight: 1.7, marginBottom: 18 }}>
+        <li>Ouvrez votre boîte mail (regardez aussi dans les <strong>spams</strong>).</li>
+        <li>Cliquez sur le lien <strong>« Confirm your mail »</strong>.</li>
+        <li>Revenez ici et connectez-vous.</li>
+      </ol>
+      <button type="button" onClick={onLogin} style={{ background: C.green, color: '#fff', border: 'none', borderRadius: 12, padding: '13px 20px', fontSize: 15, fontWeight: 800, cursor: 'pointer', width: '100%', fontFamily: font }}>
+        J’ai confirmé — me connecter
+      </button>
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
+        <LinkButton onClick={resend}>{busy ? 'Envoi…' : 'Je n’ai rien reçu — renvoyer l’e-mail'}</LinkButton>
+      </div>
+    </Shell>
+  );
+}
+
 export function AuthScreen() {
-  const [mode, setMode] = useState('login'); // 'login' | 'signup' | 'forgot'
+  const [mode, setMode] = useState('login'); // 'login' | 'signup' | 'forgot' | 'checkEmail'
+  const [farmName, setFarmName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
@@ -88,10 +129,10 @@ export function AuthScreen() {
         const { error: err } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
         if (err) throw err;
       } else if (mode === 'signup') {
-        const { data, error: err } = await supabase.auth.signUp({ email: email.trim(), password, options: { emailRedirectTo: redirectTo } });
+        const { data, error: err } = await supabase.auth.signUp({ email: email.trim(), password, options: { emailRedirectTo: redirectTo, data: { farm_name: farmName.trim() } } });
         if (err) throw err;
         // Sans session, la confirmation par e-mail est requise.
-        if (!data.session) setInfo('Compte créé ! Ouvrez le lien reçu par e-mail pour l’activer, puis connectez-vous.');
+        if (!data.session) { setPassword(''); setMode('checkEmail'); }
       } else {
         const { error: err } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo });
         if (err) throw err;
@@ -104,6 +145,8 @@ export function AuthScreen() {
     }
   };
 
+  if (mode === 'checkEmail') return <CheckEmailScreen email={email.trim()} redirectTo={redirectTo} onLogin={() => go('login')} />;
+
   const titles = {
     login: ['Connexion', 'Retrouvez vos incubations et vos bandes sur n’importe quel téléphone.'],
     signup: ['Créer un compte', 'Vos données seront sauvegardées en ligne et liées à ce compte.'],
@@ -115,6 +158,9 @@ export function AuthScreen() {
       <form onSubmit={submit}>
         {error && <Notice tone="error">{error}</Notice>}
         {info && <Notice>{info}</Notice>}
+        {mode === 'signup' && (
+          <Field label="Nom de votre ferme" type="text" autoComplete="organization" required maxLength={60} value={farmName} onChange={(e) => setFarmName(e.target.value)} placeholder="Ex. : Ferme Avicole du Soleil" />
+        )}
         <Field label="Adresse e-mail" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="vous@exemple.com" />
         {mode !== 'forgot' && (
           <Field label="Mot de passe" type="password" autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} placeholder={mode === 'signup' ? '6 caractères minimum' : ''} />
