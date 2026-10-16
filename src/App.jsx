@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useCollection, useSyncStatus, clearLocalUserData } from "./store.jsx";
+import { supabase } from "./supabase.js";
 
 // ═══════════════════════════════════════════
 //  DONNÉES — INCUBATION
@@ -859,11 +861,6 @@ const genId=()=>Math.random().toString(36).slice(2,11);
 const fmtQty=kg=>{const g=kg*1000;return g<100?`${Math.round(g)} g`:`${kg} kg`;};
 const today=()=>new Date().toISOString().split("T")[0];
 
-function useStorage(key,fallback=null){
-  const[data,setData]=useState(()=>{try{const i=localStorage.getItem(key);return i?JSON.parse(i):fallback;}catch{return fallback;}});
-  const save=useCallback(val=>{try{localStorage.setItem(key,JSON.stringify(val));}catch{}setData(val);},[key]);
-  return[data,save,true];
-}
 
 // ═══════════════════════════════════════════
 //  DESIGN TOKENS
@@ -888,7 +885,28 @@ const FormationBtn=()=>(<button style={{...btn(C.blue,"#fff",{marginTop:8})}}>�
 //  ACCUEIL
 // ═══════════════════════════════════════════
 
-function HomeScreen({go}){
+const SYNC_LABELS={synced:["✓","Sauvegardé en ligne"],syncing:["⟳","Synchronisation…"],offline:["⚡","Hors ligne"],error:["!","Erreur de synchro · Réessayer"]};
+
+// Compte connecté + état de la sauvegarde en ligne + déconnexion.
+function AccountBar({user}){
+  const{syncStatus,pendingCount,syncNow}=useSyncStatus();
+  const[icon,label]=SYNC_LABELS[syncStatus]||SYNC_LABELS.syncing;
+  const detail=syncStatus==="offline"&&pendingCount>0?` · ${pendingCount} modif. en attente`:"";
+  const logout=async()=>{
+    if(pendingCount>0&&!window.confirm(`${pendingCount} modification(s) ne sont pas encore sauvegardées en ligne et seront perdues. Se déconnecter quand même ?`))return;
+    await supabase.auth.signOut();
+    clearLocalUserData(user.id);
+  };
+  return(
+    <div style={{marginTop:14,display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+      <button onClick={syncNow} style={{background:"rgba(255,255,255,.18)",border:"none",borderRadius:20,padding:"5px 11px",color:"#fff",fontSize:11,fontWeight:800,cursor:"pointer",fontFamily:"'Nunito',sans-serif"}}>{icon} {label}{detail}</button>
+      <div style={{fontSize:11,opacity:.75,flex:1,minWidth:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{user?.email}</div>
+      <button onClick={logout} style={{background:"transparent",border:"1.5px solid rgba(255,255,255,.5)",borderRadius:20,padding:"4px 11px",color:"#fff",fontSize:11,fontWeight:800,cursor:"pointer",fontFamily:"'Nunito',sans-serif"}}>Déconnexion</button>
+    </div>
+  );
+}
+
+function HomeScreen({go,user}){
   const modules=[
     {id:"incubation",icon:"🥚",label:"Incubation",desc:"Suivez vos incubations",bg:"#E6F4EA",accent:C.green},
     {id:"formule",icon:"🌾",label:"Formule Alimentaire",desc:"Calculez votre provende",bg:"#FEF3E8",accent:C.orange},
@@ -901,6 +919,7 @@ function HomeScreen({go}){
         <div style={{fontSize:11,fontWeight:700,opacity:.7,letterSpacing:1.2,marginBottom:10}}>ASSISTANT NUMÉRIQUE</div>
         <div style={{fontSize:30,fontWeight:900,lineHeight:1.15}}>AviAssist 🐓</div>
         <div style={{fontSize:14,opacity:.8,marginTop:6}}>Votre partenaire avicole au quotidien</div>
+        <AccountBar user={user}/>
       </div>
       <div style={{margin:"0 16px",marginTop:-22,background:C.card,borderRadius:16,padding:"14px 10px",boxShadow:"0 6px 20px rgba(0,0,0,.12)",display:"flex",justifyContent:"space-around"}}>
         {[["5","Modules"],["Offline","Fonctionne"],["Gratuit","Accès"]].map(([v,l])=>(<div key={l} style={{textAlign:"center"}}><div style={{fontSize:18,fontWeight:900,color:C.green}}>{v}</div><div style={{fontSize:10,fontWeight:700,color:C.muted}}>{l}</div></div>))}
@@ -941,7 +960,7 @@ const INCUB_BACK={result:"new",history:"home",histDetail:"history",eclosionEntry
 function IncubationModule({onBack,registerBack}){
   const[screen,setScreen]=useState("home");
   const[form,setForm]=useState({type:"",dateStart:"",qty:"",ambientTemp:""});
-  const[hist,saveHist]=useStorage("avi:incubation_hist",[]);
+  const[hist,saveHist]=useCollection("incubations");
   const[selHist,setSelHist]=useState(null);
   const[eclosionInput,setEI]=useState("");
 
@@ -1574,7 +1593,7 @@ const emptyVen=()=>({produit:"",qty:"",prixUnit:"",montant:"",date:today(),remar
 const TRES_BACK={create:"list",detail:"list",addDep:"detail",editDep:"detail",addVen:"detail",editVen:"detail",bilan:"detail"};
 
 function TresorerieModule({onBack,registerBack}){
-  const[bandes,saveBandes]=useStorage("avi:tresorerie_bandes",[]);
+  const[bandes,saveBandes]=useCollection("bandes");
   const[screen,setScreen]=useState("list");
   const[bandeId,setBandeId]=useState(null);
   const[tab,setTab]=useState("depenses");
@@ -1846,7 +1865,7 @@ function TresorerieModule({onBack,registerBack}){
 //  APPLICATION PRINCIPALE + BACK BUTTON
 // ═══════════════════════════════════════════
 
-export default function App(){
+export default function App({user}){
   const[screen,setScreen]=useState("home");
   const[exitToast,setExitToast]=useState(false);
   const moduleBackRef=useRef(null);
@@ -1924,18 +1943,12 @@ export default function App(){
 
   const moduleProps={registerBack};
 
-  const screens={
-    home:<HomeScreen go={goTo}/>,
-    incubation:<IncubationModule onBack={goHome} {...moduleProps}/>,
-    formule:<FormuleModule onBack={goHome} {...moduleProps}/>,
-    maladies:<MaladiesModule onBack={goHome} {...moduleProps}/>,
-    formations:<FormationsModule onBack={goHome} {...moduleProps}/>,
-    tresorerie:<TresorerieModule onBack={goHome} {...moduleProps}/>,
-  };
+  // Seul l'écran affiché est créé.
+  const MODULES={incubation:IncubationModule,formule:FormuleModule,maladies:MaladiesModule,formations:FormationsModule,tresorerie:TresorerieModule};
+  const Module=MODULES[screen];
 
   return(<>
     <style>{`
-      @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
       *{box-sizing:border-box;margin:0;padding:0;}
       body{background:#C8D4C0;font-family:'Nunito',sans-serif;}
       ::-webkit-scrollbar{display:none;}
@@ -1945,7 +1958,7 @@ export default function App(){
     `}</style>
     <div style={{background:"#C8D4C0",minHeight:"100vh",display:"flex",justifyContent:"center",alignItems:"flex-start",padding:"16px 0"}}>
       <div style={{width:"100%",maxWidth:430,background:"#F2F5EE",minHeight:"100vh",boxShadow:"0 8px 40px rgba(0,0,0,.18)",borderRadius:8,overflowY:"auto",overflowX:"hidden",position:"relative"}}>
-        {screens[screen]||screens.home}
+        {Module?<Module onBack={goHome} {...moduleProps}/>:<HomeScreen go={goTo} user={user}/>}
         {/* Toast "Appuyez encore pour quitter" */}
         {exitToast&&(<div style={{position:"fixed",bottom:32,left:"50%",transform:"translateX(-50%)",background:"rgba(0,0,0,.82)",color:"#fff",borderRadius:24,padding:"10px 20px",fontSize:13,fontWeight:700,zIndex:9999,whiteSpace:"nowrap",boxShadow:"0 4px 20px rgba(0,0,0,.3)"}}>Appuyez encore pour quitter</div>)}
       </div>
