@@ -1,14 +1,12 @@
 import { useState } from 'react';
 import { supabase } from './supabase.js';
+import { Egg, Wallet, Cloud, Mail, Check } from 'lucide-react';
+import { Logo } from './ui.jsx';
 
 // ═══════════════════════════════════════════
 //  ÉCRANS DE COMPTE : connexion, inscription, mot de passe oublié,
 //  et choix d'un nouveau mot de passe (après le lien reçu par e-mail).
 // ═══════════════════════════════════════════
-
-const C = { green: '#2A7A40', greenDk: '#1B5229', greenLt: '#E8F5EC', red: '#C0392B', redLt: '#FDECEA', bg: '#F2F5EE', card: '#FFFFFF', border: '#DDE8D5', text: '#18230F', muted: '#5C7052' };
-const font = "'Nunito',sans-serif";
-const inputStyle = { width: '100%', padding: '12px 13px', borderRadius: 10, border: `1.5px solid ${C.border}`, fontSize: 15, fontFamily: font, outline: 'none', background: '#FAFDFA', boxSizing: 'border-box', color: C.text };
 
 // Messages d'erreur Supabase traduits pour l'utilisateur.
 function messageErreur(error) {
@@ -23,49 +21,63 @@ function messageErreur(error) {
   return error?.message || 'Une erreur est survenue.';
 }
 
+const FEATURES = [
+  { icon: Egg, text: 'Calendrier d’incubation jour par jour' },
+  { icon: Wallet, text: 'Dépenses, ventes et bénéfice par bande' },
+  { icon: Cloud, text: 'Données sauvegardées en ligne, même hors connexion' },
+];
+
 function Shell({ title, subtitle, children }) {
   return (
-    <div style={{ background: '#C8D4C0', minHeight: '100vh', display: 'flex', justifyContent: 'center', fontFamily: font }}>
-      <div style={{ width: '100%', maxWidth: 430, background: C.bg, minHeight: '100vh' }}>
-        <div style={{ background: `linear-gradient(150deg,${C.green},${C.greenDk})`, padding: '30px 18px 46px', color: '#fff' }}>
-          <div style={{ fontSize: 11, fontWeight: 700, opacity: 0.7, letterSpacing: 1.2, marginBottom: 10 }}>ASSISTANT NUMÉRIQUE</div>
-          <div style={{ fontSize: 30, fontWeight: 900, lineHeight: 1.15 }}>AviAssist 🐓</div>
-          <div style={{ fontSize: 14, opacity: 0.8, marginTop: 6 }}>Votre partenaire avicole au quotidien</div>
+    <div className="auth">
+      <aside className="auth-aside">
+        <div className="row" style={{ gap: 12 }}>
+          <Logo size={42} />
+          <span style={{ fontSize: 20, fontWeight: 800 }}>AviAssist</span>
         </div>
-        <div style={{ margin: '-22px 16px 0', background: C.card, borderRadius: 16, padding: 20, boxShadow: '0 6px 20px rgba(0,0,0,.12)' }}>
-          <div style={{ fontSize: 22, fontWeight: 900, color: C.text }}>{title}</div>
-          {subtitle && <div style={{ fontSize: 13, color: C.muted, marginTop: 4, marginBottom: 16, lineHeight: 1.5 }}>{subtitle}</div>}
+        <div>
+          <h2>Votre assistant avicole au quotidien.</h2>
+          <p>Incubation, alimentation, santé et trésorerie : tout votre élevage au même endroit, sur téléphone comme sur ordinateur.</p>
+          <div className="auth-feats">
+            {FEATURES.map(({ icon: I, text }) => <div key={text} className="auth-feat"><span className="ic"><I size={20} /></span>{text}</div>)}
+          </div>
+        </div>
+        <div style={{ fontSize: 13, opacity: .6 }}>© AviAssist</div>
+      </aside>
+      <main className="auth-main">
+        <div className="auth-card">
+          <div className="auth-brand mobile-brand">
+            <Logo size={42} />
+            <div><div className="brand-name">AviAssist</div><div className="brand-tag">Votre assistant avicole</div></div>
+          </div>
+          <h1 className="auth-title">{title}</h1>
+          {subtitle && <p className="auth-sub">{subtitle}</p>}
           {children}
         </div>
-      </div>
+      </main>
     </div>
   );
 }
 
 function Field({ label, ...props }) {
   return (
-    <label style={{ display: 'block', marginBottom: 12 }}>
-      <span style={{ display: 'block', fontSize: 11, fontWeight: 800, color: C.muted, textTransform: 'uppercase', letterSpacing: '.6px', marginBottom: 6 }}>{label}</span>
-      <input {...props} style={inputStyle} />
+    <label className="field">
+      <span className="label">{label}</span>
+      <input className="input" {...props} />
     </label>
   );
 }
 
 function Notice({ tone, children }) {
-  const s = tone === 'error' ? { bg: C.redLt, fg: C.red } : { bg: C.greenLt, fg: C.green };
-  return <div style={{ fontSize: 13, fontWeight: 700, padding: '10px 12px', borderRadius: 10, marginBottom: 12, background: s.bg, color: s.fg, lineHeight: 1.5 }}>{children}</div>;
+  return <div className={`notice ${tone === 'error' ? 'error' : 'ok'}`}>{children}</div>;
 }
 
 function SubmitButton({ busy, children }) {
-  return (
-    <button type="submit" disabled={busy} style={{ background: C.green, color: '#fff', border: 'none', borderRadius: 12, padding: '13px 20px', fontSize: 15, fontWeight: 800, cursor: 'pointer', width: '100%', fontFamily: font, opacity: busy ? 0.6 : 1 }}>
-      {busy ? 'Patientez…' : children}
-    </button>
-  );
+  return <button type="submit" disabled={busy} className="btn block" style={{ marginTop: 22 }}>{busy ? 'Patientez…' : children}</button>;
 }
 
 function LinkButton({ onClick, children }) {
-  return <button type="button" onClick={onClick} style={{ background: 'none', border: 'none', color: C.green, fontSize: 14, fontWeight: 800, cursor: 'pointer', fontFamily: font }}>{children}</button>;
+  return <button type="button" onClick={onClick} className="link">{children}</button>;
 }
 
 // Nom de la ferme, affiché dans l'app à la place de l'adresse e-mail.
@@ -85,23 +97,20 @@ function CheckEmailScreen({ email, redirectTo, onLogin }) {
     else setInfo('E-mail renvoyé. Pensez à regarder dans les spams.');
   };
 
+  const steps = ['Ouvrez votre boîte mail (regardez aussi dans les spams).', 'Cliquez sur le lien « Confirm your mail ».', 'Revenez ici et connectez-vous.'];
   return (
-    <Shell title="Vérifiez votre e-mail 📩" subtitle="Votre compte est créé. Il reste une étape pour l’activer.">
+    <Shell title="Vérifiez votre e-mail" subtitle="Votre compte est créé. Il reste une étape pour l’activer.">
       {error && <Notice tone="error">{error}</Notice>}
       {info && <Notice>{info}</Notice>}
-      <div style={{ background: C.greenLt, borderRadius: 12, padding: 14, marginBottom: 16, fontSize: 14, color: C.text, lineHeight: 1.6 }}>
-        Nous avons envoyé un lien de confirmation à<br />
-        <strong style={{ wordBreak: 'break-all' }}>{email}</strong>
+      <div className="callout tone-green" style={{ marginBottom: 18 }}>
+        <Mail size={20} />
+        <div>Lien de confirmation envoyé à<br /><strong style={{ wordBreak: 'break-all' }}>{email}</strong></div>
       </div>
-      <ol style={{ paddingLeft: 20, fontSize: 14, color: C.text, lineHeight: 1.7, marginBottom: 18 }}>
-        <li>Ouvrez votre boîte mail (regardez aussi dans les <strong>spams</strong>).</li>
-        <li>Cliquez sur le lien <strong>« Confirm your mail »</strong>.</li>
-        <li>Revenez ici et connectez-vous.</li>
+      <ol className="timeline tone-green" style={{ marginBottom: 22 }}>
+        {steps.map((t, i) => <li key={i}><span className="day-chip" style={{ minWidth: 24 }}>{i + 1}</span><span>{t}</span></li>)}
       </ol>
-      <button type="button" onClick={onLogin} style={{ background: C.green, color: '#fff', border: 'none', borderRadius: 12, padding: '13px 20px', fontSize: 15, fontWeight: 800, cursor: 'pointer', width: '100%', fontFamily: font }}>
-        J’ai confirmé — me connecter
-      </button>
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
+      <button type="button" onClick={onLogin} className="btn block"><Check size={18} />J’ai confirmé — me connecter</button>
+      <div className="auth-links">
         <LinkButton onClick={resend}>{busy ? 'Envoi…' : 'Je n’ai rien reçu — renvoyer l’e-mail'}</LinkButton>
       </div>
     </Shell>
@@ -165,11 +174,11 @@ export function AuthScreen() {
         {mode !== 'forgot' && (
           <Field label="Mot de passe" type="password" autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} placeholder={mode === 'signup' ? '6 caractères minimum' : ''} />
         )}
-        <div style={{ marginTop: 6 }}>
+        <div>
           <SubmitButton busy={busy}>{mode === 'login' ? 'Se connecter' : mode === 'signup' ? 'Créer mon compte' : 'Envoyer le lien'}</SubmitButton>
         </div>
       </form>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, marginTop: 18 }}>
+      <div className="auth-links">
         {mode === 'login' && <>
           <LinkButton onClick={() => go('signup')}>Pas encore de compte ? Créer un compte</LinkButton>
           <LinkButton onClick={() => go('forgot')}>Mot de passe oublié ?</LinkButton>
@@ -200,7 +209,7 @@ export function NewPasswordScreen({ onDone }) {
       <form onSubmit={submit}>
         {error && <Notice tone="error">{error}</Notice>}
         <Field label="Nouveau mot de passe" type="password" autoComplete="new-password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="6 caractères minimum" />
-        <div style={{ marginTop: 6 }}><SubmitButton busy={busy}>Enregistrer</SubmitButton></div>
+        <div><SubmitButton busy={busy}>Enregistrer</SubmitButton></div>
       </form>
     </Shell>
   );

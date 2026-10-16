@@ -3,7 +3,7 @@
 // - Pages : réseau d'abord (nouvelle version immédiate), cache si hors ligne.
 // - Fichiers JS/CSS/images de l'app : cache d'abord (leurs noms changent à chaque version).
 // - Supabase et autres sites : jamais mis en cache ici (sauf les polices).
-const CACHE_NAME = 'aviassist-v2';
+const CACHE_NAME = 'aviassist-v3';
 
 self.addEventListener('install', event => {
   self.skipWaiting();

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import ReactDOM from 'react-dom/client'
+import './styles.css'
 import App from './App.jsx'
 import { AuthScreen, NewPasswordScreen } from './Auth.jsx'
 import { DataProvider, clearLegacyData } from './store.jsx'
@@ -23,7 +24,7 @@ function Root() {
   }, [])
 
   if (session === undefined) {
-    return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F2F5EE', color: '#5C7052', fontFamily: "'Nunito',sans-serif", fontWeight: 800 }}>Chargement…</div>
+    return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)', color: 'var(--muted)', fontWeight: 700 }}>Chargement…</div>
   }
   if (session && recovery) return <NewPasswordScreen onDone={() => setRecovery(false)} />
   if (!session) return <AuthScreen />
